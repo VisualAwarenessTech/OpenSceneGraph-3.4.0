@@ -229,7 +229,16 @@ bool Document::MapTextureName2Archive(std::string &textureName)
 		if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
 			return false;
 		std::string base = textureName.substr(pos + pos2 + 1);
-		std::string mappedname = _Archive_KeyName;
+		unsigned int iselpos = textureName.find("_D301");
+		std::string mappedname;
+		if (iselpos != std::string::npos && ((iselpos + 15) < len))
+		{
+			std::string inselstring = textureName.substr(iselpos + 5, 11);
+			unsigned int oselpos = _Archive_KeyName.find("_S001");
+			mappedname = _Archive_KeyName.substr(0, oselpos) + inselstring + _Archive_KeyName.substr(oselpos + 11);
+		}
+		else
+		   mappedname = _Archive_KeyName;
 		mappedname.append(base);
 		textureName = mappedname;
 		return true;
@@ -249,7 +258,6 @@ std::string  Document::archive_findDataFile(std::string &filename)
 			return comp;
 		}
 	}
-	OSG_WARN <<  "Texture File " << filename << " not found in archive" << std::endl;
 	return result;
 }
 

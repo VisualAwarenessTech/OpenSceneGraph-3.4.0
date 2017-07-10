@@ -241,11 +241,18 @@ ExportOptions::parseOptionsString()
 		else if (token == _RemapTex2Directory)
 		{
 			setTextureRemapPredicate(value);
-			int tpos = value.find("501_GTModelTexture");
-			if (tpos == std::string::npos)
-				setRemapTextureFilePath(ExportOptions::GeoSpecific);
+			if (value == "./")
+			{
+				setRemapTextureFilePath(ExportOptions::ToRGB);
+			}
 			else
-				setRemapTextureFilePath(ExportOptions::GeoTypical);
+			{
+				int tpos = value.find("501_GTModelTexture");
+				if (tpos == std::string::npos)
+					setRemapTextureFilePath(ExportOptions::GeoSpecific);
+				else
+					setRemapTextureFilePath(ExportOptions::GeoTypical);
+			}
 		}
         else
             OSG_WARN << "fltexp: Bogus OptionString: " << token << std::endl;

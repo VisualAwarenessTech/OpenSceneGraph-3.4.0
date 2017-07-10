@@ -489,9 +489,14 @@ protected:
 		std::string pathname;
 		if (document.getTextureInArchive())
 		{
-			if (document.MapTextureName2Archive(filename))
+			std::string archivePath = filename;
+			if (document.MapTextureName2Archive(archivePath))
 			{
-				pathname = document.archive_findDataFile(filename);
+				pathname = document.archive_findDataFile(archivePath);
+				if(pathname.empty())
+					pathname = osgDB::findDataFile(filename, document.getOptions());
+				if(pathname.empty())
+					OSG_WARN << "Texture File " << filename << " " << archivePath <<" not found GT Tex or in archive" << std::endl;
 			}
 			else
 				pathname = "";

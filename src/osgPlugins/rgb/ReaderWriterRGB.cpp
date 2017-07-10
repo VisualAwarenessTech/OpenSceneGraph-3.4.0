@@ -159,6 +159,11 @@ static rawImageRec *RawImageOpen(std::istream& fin)
     } endianTest;
     rawImageRec *raw;
     int x;
+	//Determine the file size
+	fin.seekg(0, fin.end);
+	size_t stream_length = fin.tellg();
+	fin.seekg(0, fin.beg);
+
 
     raw = new rawImageRec;
     if (raw == NULL)
@@ -193,6 +198,12 @@ static rawImageRec *RawImageOpen(std::istream& fin)
     raw->rowStart = 0;
     raw->rowSize = 0;
     raw->bpc = (raw->type & 0x00FF);
+
+	//Verify that the file size matches the bytes needed otherwise we will end up with a
+	//memory exception
+	size_t streamsizeneeded = (raw->sizeX * raw->sizeY * raw->sizeZ * raw->bpc) + 512;
+	if (streamsizeneeded > stream_length)
+		return NULL;
 
     raw->tmp = new unsigned char [raw->sizeX*256*raw->bpc];
     if (raw->tmp == NULL )

@@ -115,6 +115,19 @@ TexturePaletteManager::write( DataOutputStream& dos ) const
 				std::string preName = "D501_S001_T001_" + WStr + "_";
 				fileName = _fltOpt.getTextureRemapPredicate() + "/" + C1Dir + "/" + C2Dir + "/" + IDirName + "/" + preName + endFileName;
 			}
+			else if (_fltOpt.getRemapTextureFilePath() == ExportOptions::ToRGB)
+			{
+				std::string endFileName = osgDB::getSimpleFileName(texture->getImage()->getFileName());
+				int pos = endFileName.find_last_of(".");
+				std::string IDirName = "";
+				if (pos != std::string::npos)
+				{
+					IDirName = endFileName.substr(0, pos);
+					endFileName = IDirName + ".rgb";
+				}
+				fileName = _fltOpt.getTextureRemapPredicate() + endFileName;
+			}
+
 		}
         else
             fileName = texture->getImage()->getFileName();

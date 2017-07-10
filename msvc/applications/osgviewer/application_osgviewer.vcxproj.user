@@ -13,7 +13,7 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='vs2015_Debug|x64'">
-    <LocalDebuggerCommandArguments>--window 1920 0 1920 1080 D:\Development\op3d_active\CDB_Data\GTModel\500_GTModelGeometry\E_Vegetation\C_Woodland\030_Trees\D500_S001_T001_EC030_030_oak_tree_big.flt</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--window 0 0 1920 1080 f:\Geospatial_Source\Data\USA\CONUS\Lidar\Florida\Tampa\LID2007_070601_W.las</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
