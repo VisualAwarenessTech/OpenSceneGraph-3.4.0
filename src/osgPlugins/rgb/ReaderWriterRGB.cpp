@@ -201,9 +201,15 @@ static rawImageRec *RawImageOpen(std::istream& fin)
 
 	//Verify that the file size matches the bytes needed otherwise we will end up with a
 	//memory exception
-	size_t streamsizeneeded = (raw->sizeX * raw->sizeY * raw->sizeZ * raw->bpc) + 512;
-	if (streamsizeneeded > stream_length)
-		return NULL;
+	bool rle = (raw->type & 0xFF00) == 0x0100;
+	if (!rle)
+	{
+		size_t streamsizeneeded = (raw->sizeX * raw->sizeY * raw->sizeZ * raw->bpc) + 512;
+		if (streamsizeneeded > stream_length)
+		{
+			return NULL;
+		}
+	}
 
     raw->tmp = new unsigned char [raw->sizeX*256*raw->bpc];
     if (raw->tmp == NULL )
@@ -250,7 +256,7 @@ static rawImageRec *RawImageOpen(std::istream& fin)
         }
     }
 
-    if ((raw->type & 0xFF00) == 0x0100)
+    if (rle)
     {
         unsigned int ybyz = raw->sizeY * raw->sizeZ;
         if ( (raw->rowStart = new GLuint [ybyz]) == NULL )
