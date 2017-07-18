@@ -247,7 +247,7 @@ ExportOptions::parseOptionsString()
 			}
 			else
 			{
-				int tpos = value.find("501_GTModelTexture");
+				size_t tpos = value.find("501_GTModelTexture");
 				if (tpos == std::string::npos)
 					setRemapTextureFilePath(ExportOptions::GeoSpecific);
 				else

@@ -141,11 +141,11 @@ bool Document::OpenArchive(std::string ArchiveName)
 	if (_Archive)
 	{
 		_Archive_FileName = ArchiveName;
-		unsigned int pos = _Archive_FileName.rfind(".");
+		size_t pos = _Archive_FileName.rfind(".");
 		if (pos != std::string::npos)
 		{
 			_Archive_KeyName = _Archive_FileName.substr(0, pos);
-			unsigned int pos2 = _Archive_KeyName.rfind("\\");
+			size_t pos2 = _Archive_KeyName.rfind("\\");
 			if ((pos2 != std::string::npos) && (pos2 + 1 < _Archive_KeyName.length()))
 			{
 				_Archive_KeyName = _Archive_KeyName.substr(pos2 + 1);
@@ -162,19 +162,19 @@ bool Document::OpenArchive(std::string ArchiveName)
 bool Document::SetTexture2MapDirectory(std::string DirectoryName, std::string ModelName)
 {
 	_TextureRemapDirectory = DirectoryName;
-	unsigned int pos = ModelName.rfind("\\");
+	size_t pos = ModelName.rfind("\\");
 	bool ret = false;
 	if ((pos != std::string::npos) && (pos + 1 < ModelName.length()))
 	{
 		_Archive_KeyName = ModelName.substr(pos+1);
-		unsigned int pos2 = _Archive_KeyName.find("_R");
+		size_t pos2 = _Archive_KeyName.find("_R");
 		if ((pos2 != std::string::npos) && (pos2 + 1 < _Archive_KeyName.length()))
 		{
-			unsigned int pos3 = _Archive_KeyName.substr(pos2 + 1).find("_");
+			size_t pos3 = _Archive_KeyName.substr(pos2 + 1).find("_");
 			if (pos3 != std::string::npos)
 			{
 				_Archive_KeyName = _Archive_KeyName.substr(0,pos2+pos3+1);
-				unsigned int pos4 = _Archive_KeyName.find("D300");
+				size_t pos4 = _Archive_KeyName.find("D300");
 				if (pos4 != std::string::npos)
 				{
 					_Archive_KeyName.replace(pos4, 4, "D301");
@@ -193,15 +193,15 @@ bool Document::MapTextureName2Directory(std::string &textureName)
 	if (!_TextureRemapDirectory.empty())
 	{
 		std::string workingname = textureName;
-		unsigned int fpos = workingname.rfind("\\");
+		size_t fpos = workingname.rfind("\\");
 		if ((fpos != std::string::npos) && (fpos+1 < workingname.length()))
 			workingname = workingname.substr(fpos + 1);
 
-		unsigned int len = workingname.length();
-		unsigned int pos = workingname.find("_R");
+		size_t len = workingname.length();
+		size_t pos = workingname.find("_R");
 		if (pos == std::string::npos || (pos + 1 >= len))
 			return false;
-		unsigned int pos2 = workingname.substr(pos + 1).find("_");
+		size_t pos2 = workingname.substr(pos + 1).find("_");
 		if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
 			return false;
 		std::string base = workingname.substr(pos + pos2 + 1);
@@ -221,20 +221,20 @@ bool Document::MapTextureName2Archive(std::string &textureName)
 {
 	if (_Archive)
 	{
-		unsigned int len = textureName.length();
-		unsigned int pos = textureName.find("_R");
+		size_t len = textureName.length();
+		size_t pos = textureName.find("_R");
 		if (pos == std::string::npos || (pos+1>=len))
 			return false;
-		unsigned int pos2 = textureName.substr(pos + 1).find("_");
+		size_t pos2 = textureName.substr(pos + 1).find("_");
 		if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
 			return false;
 		std::string base = textureName.substr(pos + pos2 + 1);
-		unsigned int iselpos = textureName.find("_D301");
+		size_t iselpos = textureName.find("_D301");
 		std::string mappedname;
 		if (iselpos != std::string::npos && ((iselpos + 15) < len))
 		{
 			std::string inselstring = textureName.substr(iselpos + 5, 11);
-			unsigned int oselpos = _Archive_KeyName.find("_S001");
+			size_t oselpos = _Archive_KeyName.find("_S001");
 			mappedname = _Archive_KeyName.substr(0, oselpos) + inselstring + _Archive_KeyName.substr(oselpos + 11);
 		}
 		else

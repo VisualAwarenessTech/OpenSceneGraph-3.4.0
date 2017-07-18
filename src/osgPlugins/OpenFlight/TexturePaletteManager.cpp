@@ -80,7 +80,7 @@ TexturePaletteManager::write( DataOutputStream& dos ) const
 			if (_fltOpt.getRemapTextureFilePath() == ExportOptions::GeoSpecific)
 			{
 				std::string temp = osgDB::getSimpleFileName(texture->getImage()->getFileName());
-				int pos = temp.find("_W");
+				size_t pos = temp.find("_W");
 				if ((pos != std::string::npos) && ((pos + 1) < temp.length()))
 				{
 					temp = temp.substr(pos + 1);
@@ -95,7 +95,7 @@ TexturePaletteManager::write( DataOutputStream& dos ) const
 			else if (_fltOpt.getRemapTextureFilePath() == ExportOptions::GeoTypical)
 			{
 				std::string endFileName = osgDB::getSimpleFileName(texture->getImage()->getFileName());
-				int pos = endFileName.find_last_of(".");
+				size_t pos = endFileName.find_last_of(".");
 				std::string IDirName = "";
 				if (pos != std::string::npos)
 				{
@@ -118,7 +118,7 @@ TexturePaletteManager::write( DataOutputStream& dos ) const
 			else if (_fltOpt.getRemapTextureFilePath() == ExportOptions::ToRGB)
 			{
 				std::string endFileName = osgDB::getSimpleFileName(texture->getImage()->getFileName());
-				int pos = endFileName.find_last_of(".");
+				size_t pos = endFileName.find_last_of(".");
 				std::string IDirName = "";
 				if (pos != std::string::npos)
 				{

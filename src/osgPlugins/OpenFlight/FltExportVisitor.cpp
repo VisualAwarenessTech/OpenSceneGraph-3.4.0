@@ -564,7 +564,7 @@ FltExportVisitor::writeATTRFile( int unit, const osg::Texture2D* texture ) const
 	{
 #if 0
 		std::string temp = osgDB::getSimpleFileName(texture->getImage()->getFileName());
-		int pos = temp.find("_W");
+		size_t pos = temp.find("_W");
 		if ((pos != std::string::npos) && ((pos + 1) < temp.length()))
 		{
 			temp = temp.substr(pos + 1);
