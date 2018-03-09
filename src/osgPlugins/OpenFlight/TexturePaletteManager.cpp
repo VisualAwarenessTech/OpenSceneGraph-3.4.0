@@ -45,7 +45,9 @@ TexturePaletteManager::add( int unit, const osg::Texture2D* texture )
     if( (!texture) ||
         (!texture->getImage()) )
         return -1;
-
+#ifdef _DEBUG
+	std::string imgname = texture->getImage()->getFileName();
+#endif
     int index( -1 );
     TextureIndexMap::const_iterator it = _indexMap.find( texture );
     if (it != _indexMap.end())
@@ -115,6 +117,29 @@ TexturePaletteManager::write( DataOutputStream& dos ) const
 				std::string preName = "D501_S001_T001_" + WStr + "_";
 				fileName = _fltOpt.getTextureRemapPredicate() + "/" + C1Dir + "/" + C2Dir + "/" + IDirName + "/" + preName + endFileName;
 			}
+			else if (_fltOpt.getRemapTextureFilePath() == ExportOptions::GeoTypical32)
+			{
+				std::string endFileName = osgDB::getSimpleFileName(texture->getImage()->getFileName());
+				size_t pos = endFileName.find_last_of(".");
+				std::string IDirName = "";
+				if (pos != std::string::npos)
+				{
+					IDirName = endFileName.substr(0, pos);
+					endFileName = IDirName + ".rgb";
+				}
+				std::string C1Dir;
+				std::string C2Dir;
+				if (endFileName.length() > 1)
+				{
+					C1Dir = endFileName.substr(0, 1);
+					std::transform(C1Dir.begin(), C1Dir.end(), C1Dir.begin(), ::toupper);
+					C2Dir = endFileName.substr(1, 1);
+					std::transform(C2Dir.begin(), C2Dir.end(), C2Dir.begin(), ::toupper);
+				}
+				std::string WStr = Get_CDB_Res_String(texture->getImage());
+				std::string preName = "D511_S001_T001_" + WStr + "_";
+				fileName = _fltOpt.getTextureRemapPredicate() + "/" + C1Dir + "/" + C2Dir + "/" + IDirName + "/" + preName + endFileName;
+			}
 			else if (_fltOpt.getRemapTextureFilePath() == ExportOptions::ToRGB)
 			{
 				std::string endFileName = osgDB::getSimpleFileName(texture->getImage()->getFileName());
@@ -168,7 +193,10 @@ std::string TexturePaletteManager::Get_CDB_Res_String(const osg::Image *image) c
 		--lod;
 
 	std::stringstream Wbuf;
-	Wbuf << "W" << std::setfill('0') << std::setw(2) << lod;
+	if(_fltOpt.getRemapTextureFilePath() == ExportOptions::GeoTypical32)
+		Wbuf << "L" << std::setfill('0') << std::setw(2) << lod;
+	else
+		Wbuf << "W" << std::setfill('0') << std::setw(2) << lod;
 	std::string LodStr = Wbuf.str();
 	return LodStr;
 }

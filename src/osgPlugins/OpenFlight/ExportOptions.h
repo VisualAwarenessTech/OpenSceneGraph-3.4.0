@@ -62,7 +62,8 @@ public:
 		NoOption = 0,
 		GeoSpecific = 1,
 		GeoTypical = 2,
-		ToRGB = 3,
+		GeoTypical32 = 3,
+		ToRGB = 4,
 	};
 
     void setFlightFileVersionNumber( int num ) { _version = num; }
@@ -88,6 +89,9 @@ public:
 
 	void setTextureRemapPredicate(std::string Predicate) { _TextureRemapPredicate = Predicate; }
 	std::string getTextureRemapPredicate() const { return _TextureRemapPredicate; }
+
+	void setCDBVersion(std::string Version) { _CDBVersion = Version; }
+	std::string getCDBVersion() const { return _CDBVersion; }
 
  // GAJ put Remap texture option here
 	FltWriteResult & getWriteResult() const { return( wr_ ); }
@@ -116,6 +120,7 @@ protected:
     static std::string _lightingOption;
     static std::string _stripTextureFilePathOption;
 	static std::string _RemapTex2Directory;
+	static std::string _CDBVersion;
 };
 
 }

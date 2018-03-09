@@ -86,6 +86,10 @@ std::string ExportOptions::_stripTextureFilePathOption( "stripTextureFilePath" )
  * option
 */
 std::string ExportOptions::_RemapTex2Directory("RemapTex2Directory");
+/** Value: "CDBVersion".
+* If present in the Options string, the exporter sets the texture remapping options to the CDB Version Specified
+*/
+std::string ExportOptions::_CDBVersion("CDBVersion");
 //@}
 
 //GAJ Add Remap texture option
@@ -251,7 +255,25 @@ ExportOptions::parseOptionsString()
 				if (tpos == std::string::npos)
 					setRemapTextureFilePath(ExportOptions::GeoSpecific);
 				else
-					setRemapTextureFilePath(ExportOptions::GeoTypical);
+				{
+					std::string VersionStr = getCDBVersion();
+					size_t rpos = VersionStr.find("3.2");
+					if(rpos != std::string::npos)
+						setRemapTextureFilePath(ExportOptions::GeoTypical32);
+					else
+						setRemapTextureFilePath(ExportOptions::GeoTypical);
+
+				}
+			}
+		}
+		else if (token == _CDBVersion)
+		{
+			setCDBVersion(value);
+			size_t tpos = value.find("3.2");
+			if (tpos != std::string::npos)
+			{
+				if (getRemapTextureFilePath() == ExportOptions::GeoTypical)
+					setRemapTextureFilePath(ExportOptions::GeoTypical32);
 			}
 		}
         else

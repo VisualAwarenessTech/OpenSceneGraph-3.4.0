@@ -241,16 +241,33 @@ FltExportVisitor::writeFace( const osg::Geode& geode, const osg::Geometry& geom,
     int16 textureIndex( -1 );
     if (isTextured( 0, geom ))
     {
-        const osg::Texture2D* texture = static_cast<const osg::Texture2D*>(
-            ss->getTextureAttribute( 0, osg::StateAttribute::TEXTURE )  );
-        if (texture != NULL)
-            textureIndex = _texturePalette->add( 0, texture );
-        else
-        {
-            std::string warning( "fltexp: Face is textured, but Texture2D StateAttribute is NULL." );
-            OSG_WARN << warning << std::endl;
-            _fltOpt->getWriteResult().warn( warning );
-        }
+#ifdef _WriteTexFromSetState
+		int ntx = ss->getNumTextureModeLists();
+		for (int i = 0; i < ntx; ++i)
+		{
+			const osg::Texture2D* texture = static_cast<const osg::Texture2D*>(
+				ss->getTextureAttribute(i, osg::StateAttribute::TEXTURE));
+			if (texture != NULL)
+				textureIndex = _texturePalette->add(i, texture);
+			else
+			{
+				std::string warning("fltexp: Face is textured, but Texture2D StateAttribute is NULL.");
+				OSG_WARN << warning << std::endl;
+				_fltOpt->getWriteResult().warn(warning);
+			}
+		}
+#else
+		const osg::Texture2D* texture = static_cast<const osg::Texture2D*>(
+			ss->getTextureAttribute(0, osg::StateAttribute::TEXTURE));
+		if (texture != NULL)
+			textureIndex = _texturePalette->add(0, texture);
+		else
+		{
+			std::string warning("fltexp: Face is textured, but Texture2D StateAttribute is NULL.");
+			OSG_WARN << warning << std::endl;
+			_fltOpt->getWriteResult().warn(warning);
+		}
+#endif
     }
 
     // Set the appropriate template mode based
@@ -416,17 +433,35 @@ FltExportVisitor::writeMesh( const osg::Geode& geode, const osg::Geometry& geom 
     int16 textureIndex( -1 );
     if (isTextured( 0, geom ))
     {
-        const osg::Texture2D* texture = static_cast<const osg::Texture2D*>(
-            ss->getTextureAttribute( 0, osg::StateAttribute::TEXTURE )  );
-        if (texture != NULL)
-            textureIndex = _texturePalette->add( 0, texture );
-        else
-        {
-            std::string warning( "fltexp: Mesh is textured, but Texture2D StateAttribute is NULL." );
-            OSG_WARN << warning << std::endl;
-            _fltOpt->getWriteResult().warn( warning );
-        }
-    }
+#ifdef _WriteTexFromSetState
+		int ntx = ss->getNumTextureModeLists();
+		for (int i = 0; i < ntx; ++i)
+		{
+			const osg::Texture2D* texture = static_cast<const osg::Texture2D*>(
+				ss->getTextureAttribute(i, osg::StateAttribute::TEXTURE));
+			if (texture != NULL)
+				textureIndex = _texturePalette->add(i, texture);
+			else
+			{
+				std::string warning("fltexp: Face is textured, but Texture2D StateAttribute is NULL.");
+				OSG_WARN << warning << std::endl;
+				_fltOpt->getWriteResult().warn(warning);
+			}
+		}
+#else
+		const osg::Texture2D* texture = static_cast<const osg::Texture2D*>(
+			ss->getTextureAttribute(0, osg::StateAttribute::TEXTURE));
+		if (texture != NULL)
+			textureIndex = _texturePalette->add(0, texture);
+		else
+		{
+			std::string warning("fltexp: Face is textured, but Texture2D StateAttribute is NULL.");
+			OSG_WARN << warning << std::endl;
+			_fltOpt->getWriteResult().warn(warning);
+		}
+#endif
+
+	}
 
     // Set the appropriate template mode based
     // on blending or Billboarding.
