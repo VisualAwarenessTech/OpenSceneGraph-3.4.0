@@ -64,6 +64,7 @@ public:
 		GeoTypical = 2,
 		GeoTypical32 = 3,
 		ToRGB = 4,
+		ToRGBwEdit = 5,
 	};
 
     void setFlightFileVersionNumber( int num ) { _version = num; }

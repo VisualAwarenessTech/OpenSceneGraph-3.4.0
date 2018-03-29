@@ -152,6 +152,12 @@ TexturePaletteManager::write( DataOutputStream& dos ) const
 				}
 				fileName = _fltOpt.getTextureRemapPredicate() + endFileName;
 			}
+			else if (_fltOpt.getRemapTextureFilePath() == ExportOptions::ToRGBwEdit)
+			{
+				std::string endFileName = osgDB::getSimpleFileName(texture->getImage()->getFileName());
+				endFileName = Strip2nth("_", endFileName, 7);
+				fileName = _fltOpt.getTextureRemapPredicate() + endFileName;
+			}
 
 		}
         else
@@ -175,6 +181,30 @@ TexturePaletteManager::write( DataOutputStream& dos ) const
             height = 0;
         }
     }
+}
+
+std::string TexturePaletteManager::Strip2nth(std::string item, std::string path, int count) const
+{
+	std::string result = path;
+	std::string working = path;
+	int cnt = 0;
+	bool done = false;
+	while (!done)
+	{
+		size_t pos = working.find(item);
+		if (pos == std::string::npos)
+			break;
+		if ((pos + 1) > working.length())
+			break;
+		working = working.substr(pos + 1);
+		++cnt;
+		if (cnt == count)
+		{
+			result = working;
+			done = true;
+		}
+	}
+	return result;
 }
 
 std::string TexturePaletteManager::Get_CDB_Res_String(const osg::Image *image) const

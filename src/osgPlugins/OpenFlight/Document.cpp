@@ -267,7 +267,10 @@ osg::ref_ptr<osg::Image> Document::readArchiveImage(const std::string filename)
 	{
 		osgDB::ReaderWriter::ReadResult r = _Archive->readImage(filename, getOptions());
 		if (r.validImage())
+		{
+			r.getImage()->setFileName(filename);
 			return r.getImage();
+		}
 	}
 	return NULL;
 }

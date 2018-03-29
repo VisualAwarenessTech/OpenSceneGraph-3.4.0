@@ -249,6 +249,11 @@ ExportOptions::parseOptionsString()
 			{
 				setRemapTextureFilePath(ExportOptions::ToRGB);
 			}
+			else if (value == "./wEdt")
+			{
+				setTextureRemapPredicate("./");
+				setRemapTextureFilePath(ExportOptions::ToRGBwEdit);
+			}
 			else
 			{
 				size_t tpos = value.find("501_GTModelTexture");
