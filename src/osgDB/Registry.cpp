@@ -1305,7 +1305,8 @@ ReaderWriter::ReadResult Registry::readImplementation(const ReadFunctor& readFun
 ReaderWriter::ReadResult Registry::openArchiveImplementation(const std::string& fileName, ReaderWriter::ArchiveStatus status, unsigned int indexBlockSizeHint, const Options* options)
 {
     osg::ref_ptr<osgDB::Archive> archive = getRefFromArchiveCache(fileName);
-    if (archive.valid()) return archive.get();
+    if (archive.valid()) 
+		return archive.get();
 
     ReaderWriter::ReadResult result = readImplementation(ReadArchiveFunctor(fileName, status, indexBlockSizeHint, options),Options::CACHE_ARCHIVES);
 
@@ -1319,6 +1320,17 @@ ReaderWriter::ReadResult Registry::openArchiveImplementation(const std::string& 
     return result;
 }
 
+bool Registry::closeArchiveImplementation(const std::string& fileName)
+{
+	osg::ref_ptr<osgDB::Archive> archive = getAndRemoveRefFromArchiveCache(fileName);
+	if (archive.valid())
+	{
+		archive->close();
+		return true;
+	}
+
+	return false;
+}
 
 ReaderWriter::ReadResult Registry::readObjectImplementation(const std::string& fileName,const Options* options)
 {
@@ -1729,8 +1741,24 @@ osg::ref_ptr<osgDB::Archive> Registry::getRefFromArchiveCache(const std::string&
 {
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_archiveCacheMutex);
     ArchiveCache::iterator itr = _archiveCache.find(fileName);
-    if (itr!=_archiveCache.end()) return itr->second;
-    else return 0;
+    if (itr!=_archiveCache.end()) 
+		return itr->second;
+    else 
+		return 0;
+}
+
+osg::ref_ptr<osgDB::Archive> Registry::getAndRemoveRefFromArchiveCache(const std::string& fileName)
+{
+	OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_archiveCacheMutex);
+	ArchiveCache::iterator itr = _archiveCache.find(fileName);
+	if (itr != _archiveCache.end())
+	{
+		osg::ref_ptr<osgDB::Archive> archive = itr->second;
+		_archiveCache.erase(itr);
+		return archive.release();
+	}
+	else
+		return 0;
 }
 
 void Registry::clearArchiveCache()

@@ -81,6 +81,9 @@ OSGDB_EXPORT Archive* openArchive(const std::string& filename, ReaderWriter::Arc
 
 /** Open an archive for reading or writing.*/
 OSGDB_EXPORT Archive* openArchive(const std::string& filename, ReaderWriter::ArchiveStatus status, unsigned int indexBlockSizeHint,Options* options);
+
+OSGDB_EXPORT bool closeArchive(const std::string& filename);
+
 }
 
 #endif // OSGDB_ARCHIVE
