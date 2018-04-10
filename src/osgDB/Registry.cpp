@@ -1104,8 +1104,9 @@ std::string Registry::findLibraryFileImplementation(const std::string& filename,
     std::string simpleFileName = getSimpleFileName(filename);
     if (simpleFileName!=filename)
     {
-        std::string fileFound = findFileInPath(simpleFileName, filepath,caseSensitivity);
-        if (!fileFound.empty()) return fileFound;
+        std::string myfileFound = findFileInPath(simpleFileName, filepath,caseSensitivity);
+        if (!myfileFound.empty()) 
+			return myfileFound;
     }
 
     // failed return empty string.
@@ -1325,7 +1326,7 @@ bool Registry::closeArchiveImplementation(const std::string& fileName)
 	osg::ref_ptr<osgDB::Archive> archive = getAndRemoveRefFromArchiveCache(fileName);
 	if (archive.valid())
 	{
-		archive->close();
+		archive->close(true);
 		return true;
 	}
 

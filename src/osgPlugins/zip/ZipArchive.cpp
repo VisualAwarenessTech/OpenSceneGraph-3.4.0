@@ -47,23 +47,41 @@ ZipArchive::~ZipArchive()
 }
 
 /** close the archive (on all threads) */
-void ZipArchive::close()
+void ZipArchive::close(bool forceall)
 {
     if ( _zipLoaded )
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> exclusive(_zipMutex);
         if ( _zipLoaded )
         {
-            // close the file (on one thread since it's a shared file)
-            const PerThreadData& data = getDataNoLock();
-            CloseZip( data._zipHandle );
+			if (forceall)
+			{
+				for (PerThreadDataMap::iterator i = _perThreadData.begin(); i != _perThreadData.end(); ++i)
+				{
+					if (i->second._zipHandle != NULL)
+					{
+						CloseZip(i->second._zipHandle);
+					}
+				}
+				// clear out the file handles
+				_perThreadData.clear();
 
-            // clear out the file handles
-            _perThreadData.clear();
+				// clear out the index.
+				_zipIndex.clear();
 
-            // clear out the index.
-            _zipIndex.clear();
+			}
+			else
+			{
+				// close the file (on one thread since it's a shared file)
+				const PerThreadData& data = getDataNoLock();
+				CloseZip(data._zipHandle);
 
+				// clear out the file handles
+				_perThreadData.clear();
+
+				// clear out the index.
+				_zipIndex.clear();
+			}
             _zipLoaded = false;
         }
     }
