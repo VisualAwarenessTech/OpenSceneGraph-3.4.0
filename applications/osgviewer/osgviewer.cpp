@@ -34,13 +34,9 @@
 #include <iostream>
 
 
-
 int main(int argc, char** argv)
 {
-#ifdef _DEBUG
-	osg::setNotifyLevel(osg::DEBUG_FP);
-#endif
-	// use an ArgumentParser object to manage the program arguments.
+    // use an ArgumentParser object to manage the program arguments.
     osg::ArgumentParser arguments(&argc,argv);
 
     arguments.getApplicationUsage()->setApplicationName(arguments.getApplicationName());
