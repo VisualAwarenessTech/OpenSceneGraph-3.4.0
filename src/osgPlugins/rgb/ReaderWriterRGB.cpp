@@ -274,7 +274,12 @@ static rawImageRec *RawImageOpen(std::istream& fin)
         }
         x = ybyz * sizeof(GLuint);
         raw->rleEnd = 512 + (2 * x);
-                fin.seekg(512,std::ios::beg);
+		if (raw->rleEnd > stream_length)
+		{
+			return NULL;
+		}
+
+        fin.seekg(512,std::ios::beg);
         fin.read((char*)raw->rowStart,x);
         fin.read((char*)raw->rowSize,x);
         if (raw->swapFlag)
@@ -282,6 +287,13 @@ static rawImageRec *RawImageOpen(std::istream& fin)
             ConvertLong(raw->rowStart, (long) (x/sizeof(GLuint)));
             ConvertLong((GLuint *)raw->rowSize, (long) (x/sizeof(GLint)));
         }
+		size_t streamsizeneeded = raw->rowStart[ybyz-1] +
+								  raw->rowSize[ybyz-1];
+		if (streamsizeneeded > stream_length)
+		{
+			return NULL;
+		}
+
     }
     return raw;
 }
