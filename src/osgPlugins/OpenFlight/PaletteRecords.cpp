@@ -499,7 +499,7 @@ protected:
 					OSG_WARN << "Texture File " << filename << " " << archivePath <<" not found GT Tex or in archive" << std::endl;
 			}
 			else
-				pathname = "";
+				pathname = osgDB::findDataFile(filename, document.getOptions());;
 		}
 		else if (document.getRemap2Directory())
 		{
