@@ -516,7 +516,7 @@ protected:
  
 		if (pathname.empty())
         {
-            OSG_WARN << "Can't find texture (" << index << ") " << filename << std::endl;
+            OSG_WARN << "gCan't find texture (" << index << ") " << filename << std::endl;
             return;
         }
 

@@ -256,13 +256,21 @@ ExportOptions::parseOptionsString()
 			}
 			else
 			{
-				size_t tpos = value.find("501_GTModelTexture");
+				std::string VersionStr = getCDBVersion();
+				size_t tpos;
+				size_t rpos = VersionStr.find("3.2");
+				
+				tpos = value.find("301_GTModelTexture");
 				if (tpos == std::string::npos)
-					setRemapTextureFilePath(ExportOptions::GeoSpecific);
+				{		
+					if (rpos != std::string::npos)
+						setRemapTextureFilePath(ExportOptions::GeoSpecific32);
+					else
+						setRemapTextureFilePath(ExportOptions::GeoSpecific);
+				}
+					
 				else
-				{
-					std::string VersionStr = getCDBVersion();
-					size_t rpos = VersionStr.find("3.2");
+				{					
 					if(rpos != std::string::npos)
 						setRemapTextureFilePath(ExportOptions::GeoTypical32);
 					else
@@ -279,6 +287,8 @@ ExportOptions::parseOptionsString()
 			{
 				if (getRemapTextureFilePath() == ExportOptions::GeoTypical)
 					setRemapTextureFilePath(ExportOptions::GeoTypical32);
+				if (getRemapTextureFilePath() == ExportOptions::GeoSpecific)
+					setRemapTextureFilePath(ExportOptions::GeoSpecific32);
 			}
 		}
         else

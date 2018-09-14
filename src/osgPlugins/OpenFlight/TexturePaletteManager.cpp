@@ -94,6 +94,21 @@ TexturePaletteManager::write( DataOutputStream& dos ) const
 				}
 				fileName = _fltOpt.getTextureRemapPredicate() + temp;
 			}
+			else if (_fltOpt.getRemapTextureFilePath() == ExportOptions::GeoSpecific32)
+			{
+				std::string temp = osgDB::getSimpleFileName(texture->getImage()->getFileName());
+				size_t pos = temp.find("_L");
+				if ((pos != std::string::npos) && ((pos + 1) < temp.length()))
+				{
+					temp = temp.substr(pos + 1);
+					pos = temp.find("_");
+					if ((pos != std::string::npos) && ((pos + 1) < temp.length()))
+					{
+						temp = temp.substr(pos + 1);
+					}
+				}
+				fileName = _fltOpt.getTextureRemapPredicate() + temp;
+			}
 			else if (_fltOpt.getRemapTextureFilePath() == ExportOptions::GeoTypical)
 			{
 				std::string endFileName = osgDB::getSimpleFileName(texture->getImage()->getFileName());
