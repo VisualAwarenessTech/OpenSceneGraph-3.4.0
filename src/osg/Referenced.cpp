@@ -323,7 +323,7 @@ void Referenced::signalObserversAndDelete(bool signalDelete, bool doDelete) cons
         if (getDeleteHandler()) 
 			deleteUsingDeleteHandler();
         else 
-		delete this;
+			delete this;
     }
 }
 
