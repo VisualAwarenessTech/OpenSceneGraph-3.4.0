@@ -89,7 +89,8 @@ std::string ExportOptions::_RemapTex2Directory("RemapTex2Directory");
 /** Value: "CDBVersion".
 * If present in the Options string, the exporter sets the texture remapping options to the CDB Version Specified
 */
-std::string ExportOptions::_CDBVersion("CDBVersion");
+std::string ExportOptions::_CDBVersion("CDBVersion"); // This is the token it can not change
+std::string ExportOptions::_CDBVersionValue("3.0"); //This is the resetable value
 //@}
 
 //GAJ Add Remap texture option
@@ -260,7 +261,7 @@ ExportOptions::parseOptionsString()
 				size_t tpos;
 				size_t rpos = VersionStr.find("3.2");
 				
-				tpos = value.find("301_GTModelTexture");
+				tpos = value.find("501_GTModelTexture");
 				if (tpos == std::string::npos)
 				{		
 					if (rpos != std::string::npos)

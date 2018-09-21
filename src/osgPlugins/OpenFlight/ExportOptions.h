@@ -92,8 +92,8 @@ public:
 	void setTextureRemapPredicate(std::string Predicate) { _TextureRemapPredicate = Predicate; }
 	std::string getTextureRemapPredicate() const { return _TextureRemapPredicate; }
 
-	void setCDBVersion(std::string Version) { _CDBVersion = Version; }
-	std::string getCDBVersion() const { return _CDBVersion; }
+	void setCDBVersion(std::string Version) { _CDBVersionValue = Version; }
+	std::string getCDBVersion() const { return _CDBVersionValue; }
 
  // GAJ put Remap texture option here
 	FltWriteResult & getWriteResult() const { return( wr_ ); }
@@ -122,6 +122,7 @@ protected:
     static std::string _lightingOption;
     static std::string _stripTextureFilePathOption;
 	static std::string _RemapTex2Directory;
+	static std::string _CDBVersionValue;
 	static std::string _CDBVersion;
 };
 
