@@ -1,0 +1,73 @@
+#pragma once
+// Copyright (c) 2016-2017 Visual Awareness Technologies and Consulting Inc, St Petersburg FL
+// This file is based on the Common Database (CDB) Specification for USSOCOM
+// Version 3.0 – October 2008
+
+// CDB_Tile is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// CDB_Tile is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+
+// You should have received a copy of the GNU Lesser General Public License
+// along with CDB_Tile.  If not, see <http://www.gnu.org/licenses/>.
+
+// 2015 GAJ Geospatial Enterprises, Orlando FL
+// Modified for General Incorporation of Common Database (CDB) support within osgEarth
+//
+#include "cdbglobals/cdbGlobals_Library.h"
+#include <sstream>
+#include <iomanip>
+#include <vector>
+#include <gdal_priv.h>
+#include <ogr_core.h>
+#include <ogrsf_frmts.h>
+#include <ogr_attrind.h>
+#include <ogr_spatialref.h>
+#include <osgDB/Archive>
+using namespace std;
+
+#ifdef _MSC_VER
+#if _MSC_VER < 1800
+#define round osg::round
+#endif
+#endif
+
+class CDBGLOBALLIBRARYAPI CDB_Global
+{
+public:
+
+	CDB_Global();
+	~CDB_Global();
+
+	void Set_BaseMapLodNum(int num);
+	int BaseMapLodNum(void);
+	void Set_EnableBathymetry(bool value);
+	bool EnableBathymetry(void);
+	void Set_LOD0_GS_FullStack(bool value);
+	bool LOD0_GS_FullStack(void);
+	void Set_LOD0_GT_FullStack(bool value);
+	bool LOD0_GT_FullStack(void);
+	void Set_CDB_Tile_Be_Verbose(bool value);
+	bool CDB_Tile_Be_Verbose(void);
+	bool Open_Vector_File(std::string FileName);
+	GDALDataset * Get_Dataset(void);
+	bool CDB_Global::Has_Layer(std::string LayerName);
+
+	static CDB_Global * getInstance(void);
+
+private:
+
+	int s_BaseMapLodNum;
+	bool s_EnableBathymetry;
+	bool s_LOD0_GS_FullStack;
+	bool s_LOD0_GT_FullStack;
+	bool s_CDB_Tile_Be_Verbose;
+
+	GDALDataset *	m_ogrDataset;
+};
+
