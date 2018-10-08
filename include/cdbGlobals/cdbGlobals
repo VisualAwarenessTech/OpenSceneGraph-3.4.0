@@ -23,19 +23,97 @@
 #include <sstream>
 #include <iomanip>
 #include <vector>
-#include <gdal_priv.h>
-#include <ogr_core.h>
-#include <ogrsf_frmts.h>
-#include <ogr_attrind.h>
-#include <ogr_spatialref.h>
-#include <osgDB/Archive>
-using namespace std;
+#include <map>
 
 #ifdef _MSC_VER
 #if _MSC_VER < 1800
 #define round osg::round
 #endif
 #endif
+
+class GDALDataset;
+struct sqlite3;
+
+struct GSMediaKeyStruct
+{
+	int	LODNum;
+	int	UrefNum;
+	int	RrefNum;
+	GSMediaKeyStruct(int lod, int uref, int rref) : LODNum(lod), UrefNum(uref), RrefNum(rref)
+	{
+	};
+	GSMediaKeyStruct() : LODNum(-1), UrefNum(-1), RrefNum(-1)
+	{
+	};
+	bool operator==(GSMediaKeyStruct &keyvalue)
+	{
+		if ((LODNum == keyvalue.LODNum) &&
+			(UrefNum == keyvalue.UrefNum) &&
+			(RrefNum == keyvalue.RrefNum))
+			return true;
+		else
+			return false;
+	}
+	bool operator>(GSMediaKeyStruct &keyvalue)
+	{
+		if (keyvalue.LODNum == LODNum)
+		{
+			if (keyvalue.UrefNum == UrefNum)
+			{
+				if (keyvalue.RrefNum == RrefNum)
+					return false;
+				else
+					return keyvalue.RrefNum > RrefNum;
+			}
+			else
+				return keyvalue.UrefNum > UrefNum;
+		}
+		else
+			return keyvalue.LODNum > LODNum;
+	}
+	bool operator<(GSMediaKeyStruct &keyvalue)
+	{
+		if (keyvalue.LODNum == LODNum)
+		{
+			if (keyvalue.UrefNum == UrefNum)
+			{
+				if (keyvalue.RrefNum == RrefNum)
+					return false;
+				else
+					return keyvalue.RrefNum < RrefNum;
+			}
+			else
+				return keyvalue.UrefNum < UrefNum;
+		}
+		else
+			return keyvalue.LODNum < LODNum;
+	}
+	std::string ToString(void)
+	{
+		std::string KeyString = std::to_string(LODNum) + "_" + std::to_string(UrefNum) + "_" + std::to_string(RrefNum);
+		return KeyString;
+	}
+
+};
+typedef GSMediaKeyStruct GSMediaKey;
+
+struct GSMediaMemoryStruct
+{
+	char * bufferdata;
+	int	   bufsize;
+	GSMediaMemoryStruct() : bufferdata(NULL), bufsize(0)
+	{
+	};
+};
+typedef GSMediaMemoryStruct GSMediaMemory;
+
+
+typedef enum
+{
+	GSGeometry = 0,
+	GSTexture = 1,
+	GSInvalid = 2,
+}GSTableType;
 
 class CDBGLOBALLIBRARYAPI CDB_Global
 {
@@ -56,7 +134,9 @@ public:
 	bool CDB_Tile_Be_Verbose(void);
 	bool Open_Vector_File(std::string FileName);
 	GDALDataset * Get_Dataset(void);
-	bool CDB_Global::Has_Layer(std::string LayerName);
+	bool Has_Layer(std::string LayerName);
+	bool Load_Media(const std::string MediaId);
+	bool Get_Media(const std::string &mediaId, std::ifstream &fin);
 
 	static CDB_Global * getInstance(void);
 
@@ -69,5 +149,15 @@ private:
 	bool s_CDB_Tile_Be_Verbose;
 
 	GDALDataset *	m_ogrDataset;
+
+	std::map<std::string, GSMediaMemory> m_GSGeometryMap;
+	std::map<std::string, GSMediaMemory> m_GSTextureMap;
+
+
+	bool ParseGSKey(const std::string &mediaId, GSMediaKey &Key, std::string &gpkgtablename, GSTableType &TableType);
+
+	bool Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, GSTableType TableType);
+
+
 };
 

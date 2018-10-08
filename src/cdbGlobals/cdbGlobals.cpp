@@ -18,13 +18,20 @@
 // 2015 GAJ Geospatial Enterprises, Orlando FL
 // Modified for General Incorporation of Common Database (CDB) support within osgEarth
 //
+
+#pragma warning (push)
+#pragma warning (disable : 4251)
 #include <cdbGlobals/cdbGlobals>
+#include <gdal_priv.h>
+#include <ogr_geopackage.h>
+
 #include <osgDB/FileUtils>
 #include <osgDB/FileNameUtils>
 
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+#pragma warning (pop)
 
 CDB_Global CDB_Global_Instance;
 
@@ -56,7 +63,7 @@ bool CDB_Global::Open_Vector_File(std::string FileName)
 		char * drivers[2];
 		drivers[0] = "GPKG";
 		drivers[1] = NULL;
-		m_ogrDataset = (GDALDataset *)GDALOpenEx(FileName.c_str(), GDAL_OF_VECTOR | GA_ReadOnly | GDAL_OF_SHARED, drivers, NULL, NULL);
+		m_ogrDataset = (GDALDataset *) GDALOpenEx(FileName.c_str(), GDAL_OF_VECTOR | GA_ReadOnly | GDAL_OF_SHARED, drivers, NULL, NULL);
 		if (!m_ogrDataset)
 			return false;
 	}
@@ -79,9 +86,232 @@ bool CDB_Global::Has_Layer(std::string LayerName)
 	}
 }
 
+
+bool CDB_Global::Load_Media(const std::string MediaId)
+{
+	GSMediaKey MyKey;
+	std::string gpkgTableName;
+	GSTableType TableType = GSInvalid;
+	if (!ParseGSKey(MediaId, MyKey, gpkgTableName, TableType))
+		return false;
+	return Add_Media_to_Map(MyKey, gpkgTableName, TableType);
+}
+
+
+bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, GSTableType TableType)
+{
+
+	std::string stringkey = MyKey.ToString();
+	if (TableType == GSGeometry)
+	{
+		
+		std::map<std::string, GSMediaMemory>::iterator id = m_GSGeometryMap.find(stringkey);
+		if (id != m_GSGeometryMap.end())
+			return true;
+	}
+	else if (TableType == GSTexture)
+	{
+		std::map<std::string, GSMediaMemory>::iterator id = m_GSTextureMap.find(stringkey);
+		if (id != m_GSTextureMap.end())
+			return true;
+	}
+	else
+	{
+		return false;
+	}
+
+
+	GDALGeoPackageDataset * poDataset = (GDALGeoPackageDataset *)m_ogrDataset;
+	sqlite3 *hDB = poDataset->GetDB();
+
+	GSMediaMemory fin;
+	char* pszSelectMedia = sqlite3_mprintf("SELECT data FROM \"%w\" WHERE uref = ? AND rref = ? ", gpkgTableName.c_str());
+	sqlite3_stmt *stmt;
+	int rc;
+	rc = sqlite3_prepare_v2(hDB, pszSelectMedia, -1, &stmt, NULL);
+	if (rc == SQLITE_OK)
+	{
+		sqlite3_bind_int(stmt, 1, MyKey.UrefNum);
+		sqlite3_bind_int(stmt, 2, MyKey.RrefNum);
+		rc = sqlite3_step(stmt);
+		if (rc == SQLITE_ROW)
+		{
+			fin.bufsize = sqlite3_column_bytes(stmt, 0);
+			fin.bufferdata = new char[fin.bufsize];
+			std::memcpy(fin.bufferdata, (char *)sqlite3_column_blob(stmt, 0), fin.bufsize);
+			rc = sqlite3_finalize(stmt);
+			if (rc == SQLITE_SCHEMA)
+				return false;
+
+			if (TableType == GSGeometry)
+			{
+				m_GSGeometryMap.insert(std::pair<std::string, GSMediaMemory>(stringkey, fin));
+			}
+			else if (TableType == GSTexture)
+			{
+				m_GSTextureMap.insert(std::pair<std::string, GSMediaMemory>(stringkey, fin));
+			}
+
+		}
+		else
+			return false;
+	}
+	else
+		return false;
+
+	return true;
+}
+
+bool CDB_Global::Get_Media(const std::string &mediaId, std::ifstream &fin)
+{
+	GSMediaKey MyKey;
+	std::string gpkgTableName;
+	GSTableType TableType = GSInvalid;
+	if (!ParseGSKey(mediaId, MyKey, gpkgTableName, TableType))
+		return false;
+
+	std::string stringkey = MyKey.ToString();
+	if (TableType == GSGeometry)
+	{
+
+		std::map<std::string, GSMediaMemory>::iterator id = m_GSGeometryMap.find(stringkey);
+		if (id != m_GSGeometryMap.end())
+		{
+			GSMediaMemory myMem = m_GSGeometryMap[stringkey];
+			fin.rdbuf()->pubsetbuf(myMem.bufferdata, myMem.bufsize);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else if (TableType == GSTexture)
+	{
+		std::map<std::string, GSMediaMemory>::iterator id = m_GSTextureMap.find(stringkey);
+		if (id != m_GSTextureMap.end())
+		{
+			GSMediaMemory myMem = m_GSTextureMap[stringkey];
+			fin.rdbuf()->pubsetbuf(myMem.bufferdata, myMem.bufsize);
+		}
+		else
+			return false;
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
+
+#if 0
+bool CDB_Global::Get_Media(const std::string &mediaId, std::ifstream &fin)
+{
+	GDALGeoPackageDataset * poDataset = (GDALGeoPackageDataset *)m_ogrDataset;
+	sqlite3 *hDB = poDataset->GetDB();
+
+	if (mediaId.substr(0, 5) != "gpkg:")
+		return false;
+	std::string tablename = mediaId.substr(5);
+	size_t pos = tablename.find_first_of(":");
+	if (pos == std::string::npos)
+		return false;
+	std::string refstring = tablename.substr(pos+1);
+	tablename = tablename.substr(0, pos);
+
+
+	pos = refstring.find_first_of(":");
+	if (pos == std::string::npos)
+		return false;
+
+	std::string urefstr = refstring.substr(0, pos);
+	std::string rrefstr = refstring.substr(pos + 1);
+	int uref = atoi(urefstr.substr(1).c_str());
+	pos = rrefstr.find(".zip");
+	if (pos == std::string::npos)
+		return false;
+	rrefstr = rrefstr.substr(0, pos);
+	int rref = atoi(rrefstr.substr(1).c_str());
+
+	char* pszSelectMedia = sqlite3_mprintf("SELECT data FROM \"%w\" WHERE uref = ? AND rref = ? ", tablename.c_str());
+	sqlite3_stmt *stmt;
+	int rc;
+	rc = sqlite3_prepare_v2(hDB, pszSelectMedia, -1, &stmt, NULL);
+	if (rc == SQLITE_OK)
+	{
+		sqlite3_bind_int(stmt, 1, uref);
+		sqlite3_bind_int(stmt, 2, rref);
+		rc = sqlite3_step(stmt);
+		if (rc == SQLITE_ROW)
+		{
+			int size = sqlite3_column_bytes(stmt, 0);
+			fin.rdbuf()->pubsetbuf((char *)sqlite3_column_blob(stmt, 0), size);
+			rc = sqlite3_finalize(stmt);
+			if (rc == SQLITE_SCHEMA)
+				return false;
+		}
+		else 
+			return false;
+	}
+	else
+		return false;
+	return true;
+}
+#endif
+
+bool CDB_Global::ParseGSKey(const std::string &mediaId, GSMediaKey &Key, std::string &gpkgtablename, GSTableType &TableType)
+{
+	if (mediaId.substr(0, 5) != "gpkg:")
+		return false;
+
+	TableType = GSInvalid;
+	size_t pos = mediaId.find("300_GSModelGeometry");
+	if (pos != std::string::npos)
+		TableType = GSGeometry;
+	else
+	{
+		pos = mediaId.find("301_GSModelTexture");
+		if (pos != std::string::npos)
+			TableType = GSTexture;
+	}
+
+	std::string tablename = mediaId.substr(5);
+	pos = tablename.find_first_of(":");
+	if (pos == std::string::npos)
+		return false;
+	std::string refstring = tablename.substr(pos + 1);
+	tablename = tablename.substr(0, pos);
+	pos = tablename.find_first_of("_L");
+	if (pos == std::string::npos)
+		return false;
+	std::string LodStr = tablename.substr(pos + 1);
+	int lod = atoi(LodStr.substr(1).c_str());
+
+	pos = refstring.find_first_of(":");
+	if (pos == std::string::npos)
+		return false;
+
+	std::string urefstr = refstring.substr(0, pos);
+	std::string rrefstr = refstring.substr(pos + 1);
+	int uref = atoi(urefstr.substr(1).c_str());
+	pos = rrefstr.find(".zip");
+	if (pos == std::string::npos)
+		return false;
+	rrefstr = rrefstr.substr(0, pos);
+	int rref = atoi(rrefstr.substr(1).c_str());
+
+	Key.LODNum = lod;
+	Key.UrefNum = uref;
+	Key.RrefNum = rref;
+	gpkgtablename = tablename;
+	return true;
+}
+
+
+
 GDALDataset * CDB_Global::Get_Dataset(void)
 {
-	return m_ogrDataset;
+	return (GDALDataset *)m_ogrDataset;
 }
 
 void CDB_Global::Set_BaseMapLodNum(int num)
@@ -138,4 +368,3 @@ CDB_Global * CDB_Global::getInstance(void)
 {
 	return &CDB_Global_Instance;
 }
-
