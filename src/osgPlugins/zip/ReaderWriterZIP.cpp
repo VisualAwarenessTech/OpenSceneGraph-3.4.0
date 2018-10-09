@@ -30,12 +30,11 @@ class ReaderWriterZIP : public osgDB::ReaderWriter
 			if (file.substr(0, 5) == "gpkg:")
 			{
 				CDB_Global * gbls = CDB_Global::getInstance();
-				std::ifstream fin;
+				std::stringstream fin;
 				if (gbls->Get_Media(file, fin))
 				{
 					return openArchive(fin, options);
 				}
-
 			}
             std::string fileName = osgDB::findDataFile(file, options);
             if (fileName.empty())

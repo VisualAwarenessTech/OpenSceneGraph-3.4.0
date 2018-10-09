@@ -27,6 +27,7 @@
 
 #include <osgDB/FileUtils>
 #include <osgDB/FileNameUtils>
+#include <ios>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -162,14 +163,16 @@ bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, G
 	return true;
 }
 
-bool CDB_Global::Get_Media(const std::string &mediaId, std::ifstream &fin)
+bool CDB_Global::Get_Media(const std::string &mediaId, std::stringstream &fin)
 {
 	GSMediaKey MyKey;
 	std::string gpkgTableName;
 	GSTableType TableType = GSInvalid;
 	if (!ParseGSKey(mediaId, MyKey, gpkgTableName, TableType))
 		return false;
-
+#ifdef _DEBUG
+	int fubar = 0;
+#endif
 	std::string stringkey = MyKey.ToString();
 	if (TableType == GSGeometry)
 	{
@@ -178,7 +181,11 @@ bool CDB_Global::Get_Media(const std::string &mediaId, std::ifstream &fin)
 		if (id != m_GSGeometryMap.end())
 		{
 			GSMediaMemory myMem = m_GSGeometryMap[stringkey];
-			fin.rdbuf()->pubsetbuf(myMem.bufferdata, myMem.bufsize);
+			if (!fin.write(myMem.bufferdata, myMem.bufsize))
+			{
+				++fubar;
+			}
+			fin.seekg(0, std::ios::beg);
 		}
 		else
 		{
@@ -191,7 +198,11 @@ bool CDB_Global::Get_Media(const std::string &mediaId, std::ifstream &fin)
 		if (id != m_GSTextureMap.end())
 		{
 			GSMediaMemory myMem = m_GSTextureMap[stringkey];
-			fin.rdbuf()->pubsetbuf(myMem.bufferdata, myMem.bufsize);
+			if (!fin.write(myMem.bufferdata, myMem.bufsize))
+			{
+				++fubar;
+			}
+			fin.seekg(0, std::ios::beg);
 		}
 		else
 			return false;
@@ -281,11 +292,11 @@ bool CDB_Global::ParseGSKey(const std::string &mediaId, GSMediaKey &Key, std::st
 		return false;
 	std::string refstring = tablename.substr(pos + 1);
 	tablename = tablename.substr(0, pos);
-	pos = tablename.find_first_of("_L");
+	pos = tablename.find_last_of("_L");
 	if (pos == std::string::npos)
 		return false;
 	std::string LodStr = tablename.substr(pos + 1);
-	int lod = atoi(LodStr.substr(1).c_str());
+	int lod = atoi(LodStr.c_str());
 
 	pos = refstring.find_first_of(":");
 	if (pos == std::string::npos)

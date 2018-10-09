@@ -136,7 +136,7 @@ public:
 	GDALDataset * Get_Dataset(void);
 	bool Has_Layer(std::string LayerName);
 	bool Load_Media(const std::string MediaId);
-	bool Get_Media(const std::string &mediaId, std::ifstream &fin);
+	bool Get_Media(const std::string &mediaId, std::stringstream &fin);
 
 	static CDB_Global * getInstance(void);
 
