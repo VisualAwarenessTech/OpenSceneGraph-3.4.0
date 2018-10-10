@@ -150,15 +150,14 @@ bool Document::OpenArchive(std::string ArchiveName)
 				size_t pos0 = temp.find_first_of("/");
 				if (pos0 != std::string::npos)
 					temp = temp.substr(pos0 + 1);
-				std::string tofind = "_R";
-				size_t pos = temp.find_first_of(tofind);
+				size_t pos = temp.find("_R");
 				if (pos != std::string::npos)
 				{
 					_Archive_KeyName = temp.substr(0, pos);
 					size_t pos2 = temp.substr(pos + 1).find_first_of("_");
 					if (pos2 != std::string::npos)
 					{
-						_Archive_KeyName += temp.substr(pos + 1, pos2 - 1);
+						_Archive_KeyName += temp.substr(pos, pos2+1);
 					}
 				}
 

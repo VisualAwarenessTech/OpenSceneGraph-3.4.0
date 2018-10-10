@@ -43,6 +43,7 @@ CDB_Global::CDB_Global() : m_ogrDataset(NULL)
 	bool s_LOD0_GS_FullStack = false;
 	bool s_LOD0_GT_FullStack = false;
 	bool s_CDB_Tile_Be_Verbose = false;
+	m_doneList.clear();
 }
 
 CDB_Global::~CDB_Global()
@@ -52,6 +53,31 @@ CDB_Global::~CDB_Global()
 		GDALClose(m_ogrDataset);
 		m_ogrDataset = NULL;
 	}
+}
+
+void CDB_Global::Check_Done(void)
+{
+	for each (std::string stringkey in m_doneList)
+	{
+		std::map<std::string, GSMediaMemory>::iterator id = m_GSGeometryMap.find(stringkey);
+		if (id != m_GSGeometryMap.end())
+		{
+			GSMediaMemory myMem = m_GSGeometryMap[stringkey];
+			delete myMem.bufferdata;
+			myMem.bufferdata = NULL;
+			m_GSGeometryMap.erase(id);
+		}
+
+		std::map<std::string, GSMediaMemory>::iterator tid = m_GSTextureMap.find(stringkey);
+		if (tid != m_GSTextureMap.end())
+		{
+			GSMediaMemory myMem = m_GSTextureMap[stringkey];
+			delete myMem.bufferdata;
+			myMem.bufferdata = NULL;
+			m_GSTextureMap.erase(tid);
+		}
+	}
+	m_doneList.clear();
 }
 
 bool CDB_Global::Open_Vector_File(std::string FileName)
@@ -207,6 +233,7 @@ bool CDB_Global::Get_Media(const std::string &mediaId, std::stringstream &fin)
 			}
 #endif
 			fin.seekg(0, std::ios::beg);
+			m_doneList.push_back(stringkey);
 		}
 		else
 			return false;

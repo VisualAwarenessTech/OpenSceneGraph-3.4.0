@@ -137,6 +137,7 @@ public:
 	bool Has_Layer(std::string LayerName);
 	bool Load_Media(const std::string MediaId);
 	bool Get_Media(const std::string &mediaId, std::stringstream &fin);
+	void Check_Done(void);
 
 	static CDB_Global * getInstance(void);
 
@@ -153,6 +154,7 @@ private:
 	std::map<std::string, GSMediaMemory> m_GSGeometryMap;
 	std::map<std::string, GSMediaMemory> m_GSTextureMap;
 
+	std::vector<std::string> m_doneList;
 
 	bool ParseGSKey(const std::string &mediaId, GSMediaKey &Key, std::string &gpkgtablename, GSTableType &TableType);
 
