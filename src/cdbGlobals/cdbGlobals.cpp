@@ -182,9 +182,11 @@ bool CDB_Global::Get_Media(const std::string &mediaId, std::stringstream &fin)
 		{
 			GSMediaMemory myMem = m_GSGeometryMap[stringkey];
 			if (!fin.write(myMem.bufferdata, myMem.bufsize))
+#ifdef _DEBUG
 			{
 				++fubar;
 			}
+#endif
 			fin.seekg(0, std::ios::beg);
 		}
 		else
@@ -199,9 +201,11 @@ bool CDB_Global::Get_Media(const std::string &mediaId, std::stringstream &fin)
 		{
 			GSMediaMemory myMem = m_GSTextureMap[stringkey];
 			if (!fin.write(myMem.bufferdata, myMem.bufsize))
+#ifdef _DEBUG
 			{
 				++fubar;
 			}
+#endif
 			fin.seekg(0, std::ios::beg);
 		}
 		else

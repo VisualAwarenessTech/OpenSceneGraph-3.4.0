@@ -140,19 +140,45 @@ bool Document::OpenArchive(std::string ArchiveName)
 	_Archive = osgDB::openArchive(ArchiveName, osgDB::ReaderWriter::READ);
 	if (_Archive)
 	{
+		_Archive->getFileNames(_Archive_FileList);
 		_Archive_FileName = ArchiveName;
-		size_t pos = _Archive_FileName.rfind(".");
-		if (pos != std::string::npos)
+		if (_Archive_FileName.substr(0, 5) == "gpkg:")
 		{
-			_Archive_KeyName = _Archive_FileName.substr(0, pos);
-			size_t pos2 = _Archive_KeyName.rfind("\\");
-			if ((pos2 != std::string::npos) && (pos2 + 1 < _Archive_KeyName.length()))
+			if (_Archive_FileList.size() > 0)
 			{
-				_Archive_KeyName = _Archive_KeyName.substr(pos2 + 1);
+				std::string temp = _Archive_FileList[0];
+				size_t pos0 = temp.find_first_of("/");
+				if (pos0 != std::string::npos)
+					temp = temp.substr(pos0 + 1);
+				std::string tofind = "_R";
+				size_t pos = temp.find_first_of(tofind);
+				if (pos != std::string::npos)
+				{
+					_Archive_KeyName = temp.substr(0, pos);
+					size_t pos2 = temp.substr(pos + 1).find_first_of("_");
+					if (pos2 != std::string::npos)
+					{
+						_Archive_KeyName += temp.substr(pos + 1, pos2 - 1);
+					}
+				}
+
 			}
 		}
 		else
-			_Archive_KeyName = _Archive_FileName;
+		{
+			size_t pos = _Archive_FileName.rfind(".");
+			if (pos != std::string::npos)
+			{
+				_Archive_KeyName = _Archive_FileName.substr(0, pos);
+				size_t pos2 = _Archive_KeyName.rfind("\\");
+				if ((pos2 != std::string::npos) && (pos2 + 1 < _Archive_KeyName.length()))
+				{
+					_Archive_KeyName = _Archive_KeyName.substr(pos2 + 1);
+				}
+			}
+			else
+				_Archive_KeyName = _Archive_FileName;
+		}
 		_Archive->getFileNames(_Archive_FileList);
 		return true;
 	}
