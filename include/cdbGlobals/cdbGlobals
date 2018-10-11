@@ -112,7 +112,9 @@ typedef enum
 {
 	GSGeometry = 0,
 	GSTexture = 1,
-	GSInvalid = 2,
+	GTGeometry = 2,
+	GTTexture = 3,
+	GSInvalid = 4,
 }GSTableType;
 
 class CDBGLOBALLIBRARYAPI CDB_Global
@@ -153,6 +155,9 @@ private:
 
 	std::map<std::string, GSMediaMemory> m_GSGeometryMap;
 	std::map<std::string, GSMediaMemory> m_GSTextureMap;
+
+	GSMediaMemory m_GTGeomtry;
+	GSMediaMemory m_GTTexture;
 
 	std::vector<std::string> m_doneList;
 

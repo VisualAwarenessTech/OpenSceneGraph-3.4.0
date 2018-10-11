@@ -142,6 +142,16 @@ bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, G
 		if (id != m_GSTextureMap.end())
 			return true;
 	}
+	else if (TableType == GTGeometry)
+	{
+		if (m_GTGeomtry.bufferdata != NULL)
+			return true;
+	}
+	else if (TableType == GTTexture)
+	{
+		if (m_GTTexture.bufferdata != NULL)
+			return true;
+	}
 	else
 	{
 		return false;
@@ -178,7 +188,14 @@ bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, G
 			{
 				m_GSTextureMap.insert(std::pair<std::string, GSMediaMemory>(stringkey, fin));
 			}
-
+			else if (TableType == GTGeometry)
+			{
+				m_GTGeomtry = fin;
+			}
+			else if (TableType == GTTexture)
+			{
+				m_GTTexture = fin;
+			}
 		}
 		else
 			return false;
@@ -307,40 +324,61 @@ bool CDB_Global::ParseGSKey(const std::string &mediaId, GSMediaKey &Key, std::st
 		return false;
 
 	TableType = GSInvalid;
-	size_t pos = mediaId.find("300_GSModelGeometry");
-	if (pos != std::string::npos)
-		TableType = GSGeometry;
-	else
+	size_t pos;
+	if (pos = mediaId.find("300_GSModelGeometry") != std::string::npos)
 	{
-		pos = mediaId.find("301_GSModelTexture");
-		if (pos != std::string::npos)
+		TableType = GSGeometry;
+	}
+	else if(pos = mediaId.find("301_GSModelTexture") != std::string::npos)
+	{
 			TableType = GSTexture;
+	}
+	else if ((pos = mediaId.find("500_GTModelGeometry") != std::string::npos))
+	{
+		TableType = GTGeometry;
+	}
+	else if ((pos = mediaId.find("500_GTModelTexture") != std::string::npos))
+	{
+		TableType = GTTexture;
 	}
 
 	std::string tablename = mediaId.substr(5);
-	pos = tablename.find_first_of(":");
-	if (pos == std::string::npos)
-		return false;
-	std::string refstring = tablename.substr(pos + 1);
-	tablename = tablename.substr(0, pos);
-	pos = tablename.find_last_of("_L");
-	if (pos == std::string::npos)
-		return false;
-	std::string LodStr = tablename.substr(pos + 1);
-	int lod = atoi(LodStr.c_str());
+	int lod;
+	int uref;
+	int rref;
+	if ((TableType == GSGeometry) || (TableType == GSTexture))
+	{
+		pos = tablename.find_first_of(":");
+		if (pos == std::string::npos)
+			return false;
+		std::string refstring = tablename.substr(pos + 1);
+		tablename = tablename.substr(0, pos);
 
-	pos = refstring.find_first_of(":");
-	if (pos == std::string::npos)
-		return false;
+		pos = tablename.find_last_of("_L");
+		if (pos == std::string::npos)
+			return false;
+		std::string LodStr = tablename.substr(pos + 1);
+		lod = atoi(LodStr.c_str());
+		pos = refstring.find_first_of(":");
+		if (pos == std::string::npos)
+			return false;
 
-	std::string urefstr = refstring.substr(0, pos);
-	std::string rrefstr = refstring.substr(pos + 1);
-	int uref = atoi(urefstr.substr(1).c_str());
-	pos = rrefstr.find(".zip");
-	if (pos == std::string::npos)
-		return false;
-	rrefstr = rrefstr.substr(0, pos);
-	int rref = atoi(rrefstr.substr(1).c_str());
+		std::string urefstr = refstring.substr(0, pos);
+		std::string rrefstr = refstring.substr(pos + 1);
+		uref = atoi(urefstr.substr(1).c_str());
+		pos = rrefstr.find(".zip");
+		if (pos == std::string::npos)
+			return false;
+		rrefstr = rrefstr.substr(0, pos);
+		rref = atoi(rrefstr.substr(1).c_str());
+	}
+	else
+	{
+		lod = 0;
+		uref = 0;
+		rref = 0;
+	}
+
 
 	Key.LODNum = lod;
 	Key.UrefNum = uref;
