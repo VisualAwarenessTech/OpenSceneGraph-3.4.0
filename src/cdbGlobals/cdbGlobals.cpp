@@ -53,6 +53,43 @@ CDB_Global::~CDB_Global()
 		GDALClose(m_ogrDataset);
 		m_ogrDataset = NULL;
 	}
+
+	for (std::map<std::string, GSMediaMemory>::iterator id = m_GSGeometryMap.begin(); id != m_GSGeometryMap.end(); ++id)
+	{
+		GSMediaMemory Mem = id->second;
+		if (Mem.bufferdata)
+		{
+			delete Mem.bufferdata;
+			Mem.bufferdata = NULL;
+			Mem.bufsize = 0;
+		}
+	}
+
+	for (std::map<std::string, GSMediaMemory>::iterator id = m_GSTextureMap.begin(); id != m_GSTextureMap.end(); ++id)
+	{
+		GSMediaMemory Mem = id->second;
+		if (Mem.bufferdata)
+		{
+			delete Mem.bufferdata;
+			Mem.bufferdata = NULL;
+			Mem.bufsize = 0;
+		}
+	}
+
+	if (m_GTGeomtry.bufferdata)
+	{
+		delete m_GTGeomtry.bufferdata;
+		m_GTGeomtry.bufferdata = NULL;
+		m_GTGeomtry.bufsize = 0;
+	}
+
+	if (m_GTTexture.bufferdata)
+	{
+		delete m_GTTexture.bufferdata;
+		m_GTTexture.bufferdata = NULL;
+		m_GTGeomtry.bufsize = 0;
+	}
+
 }
 
 void CDB_Global::Check_Done(void)
@@ -333,11 +370,11 @@ bool CDB_Global::ParseGSKey(const std::string &mediaId, GSMediaKey &Key, std::st
 	{
 			TableType = GSTexture;
 	}
-	else if ((pos = mediaId.find("500_GTModelGeometry") != std::string::npos))
+	else if ((pos = mediaId.find("GTModelGeometry") != std::string::npos))
 	{
 		TableType = GTGeometry;
 	}
-	else if ((pos = mediaId.find("500_GTModelTexture") != std::string::npos))
+	else if ((pos = mediaId.find("GTModelTexture") != std::string::npos))
 	{
 		TableType = GTTexture;
 	}
