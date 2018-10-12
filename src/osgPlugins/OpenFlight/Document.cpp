@@ -144,23 +144,27 @@ bool Document::OpenArchive(std::string ArchiveName)
 		_Archive_FileName = ArchiveName;
 		if (_Archive_FileName.substr(0, 5) == "gpkg:")
 		{
-			if (_Archive_FileList.size() > 0)
+			size_t posx = _Archive_FileName.find("GTModel");
+			if (posx == std::string::npos)
 			{
-				std::string temp = _Archive_FileList[0];
-				size_t pos0 = temp.find_first_of("/");
-				if (pos0 != std::string::npos)
-					temp = temp.substr(pos0 + 1);
-				size_t pos = temp.find("_R");
-				if (pos != std::string::npos)
+
+				if (_Archive_FileList.size() > 0)
 				{
-					_Archive_KeyName = temp.substr(0, pos);
-					size_t pos2 = temp.substr(pos + 1).find_first_of("_");
-					if (pos2 != std::string::npos)
+					std::string temp = _Archive_FileList[0];
+					size_t pos0 = temp.find_first_of("/");
+					if (pos0 != std::string::npos)
+						temp = temp.substr(pos0 + 1);
+					size_t pos = temp.find("_R");
+					if (pos != std::string::npos)
 					{
-						_Archive_KeyName += temp.substr(pos, pos2+1);
+						_Archive_KeyName = temp.substr(0, pos);
+						size_t pos2 = temp.substr(pos + 1).find_first_of("_");
+						if (pos2 != std::string::npos)
+						{
+							_Archive_KeyName += temp.substr(pos, pos2 + 1);
+						}
 					}
 				}
-
 			}
 		}
 		else
@@ -246,26 +250,34 @@ bool Document::MapTextureName2Archive(std::string &textureName)
 {
 	if (_Archive)
 	{
-		size_t len = textureName.length();
-		size_t pos = textureName.find("_R");
-		if (pos == std::string::npos || (pos+1>=len))
-			return false;
-		size_t pos2 = textureName.substr(pos + 1).find("_");
-		if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
-			return false;
-		std::string base = textureName.substr(pos + pos2 + 1);
-		size_t iselpos = textureName.find("_D301");
-		std::string mappedname;
-		if (iselpos != std::string::npos && ((iselpos + 15) < len))
+		size_t pos0 = textureName.find("501_GTModelTexture");
+		if (pos0 != std::string::npos)
 		{
-			std::string inselstring = textureName.substr(iselpos + 5, 11);
-			size_t oselpos = _Archive_KeyName.find("_S001");
-			mappedname = _Archive_KeyName.substr(0, oselpos) + inselstring + _Archive_KeyName.substr(oselpos + 11);
+			textureName = textureName.substr(pos0 + 18);
 		}
 		else
-		   mappedname = _Archive_KeyName;
-		mappedname.append(base);
-		textureName = mappedname;
+		{
+			size_t len = textureName.length();
+			size_t pos = textureName.find("_R");
+			if (pos == std::string::npos || (pos + 1 >= len))
+				return false;
+			size_t pos2 = textureName.substr(pos + 1).find("_");
+			if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
+				return false;
+			std::string base = textureName.substr(pos + pos2 + 1);
+			size_t iselpos = textureName.find("_D301");
+			std::string mappedname;
+			if (iselpos != std::string::npos && ((iselpos + 15) < len))
+			{
+				std::string inselstring = textureName.substr(iselpos + 5, 11);
+				size_t oselpos = _Archive_KeyName.find("_S001");
+				mappedname = _Archive_KeyName.substr(0, oselpos) + inselstring + _Archive_KeyName.substr(oselpos + 11);
+			}
+			else
+				mappedname = _Archive_KeyName;
+			mappedname.append(base);
+			textureName = mappedname;
+		}
 		return true;
 	}
 	else

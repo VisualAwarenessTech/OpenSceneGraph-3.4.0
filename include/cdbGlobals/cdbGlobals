@@ -156,7 +156,7 @@ private:
 	std::map<std::string, GSMediaMemory> m_GSGeometryMap;
 	std::map<std::string, GSMediaMemory> m_GSTextureMap;
 
-	GSMediaMemory m_GTGeomtry;
+	GSMediaMemory m_GTGeometry;
 	GSMediaMemory m_GTTexture;
 
 	std::vector<std::string> m_doneList;

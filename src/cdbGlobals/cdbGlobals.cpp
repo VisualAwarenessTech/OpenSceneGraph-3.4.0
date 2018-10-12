@@ -76,18 +76,18 @@ CDB_Global::~CDB_Global()
 		}
 	}
 
-	if (m_GTGeomtry.bufferdata)
+	if (m_GTGeometry.bufferdata)
 	{
-		delete m_GTGeomtry.bufferdata;
-		m_GTGeomtry.bufferdata = NULL;
-		m_GTGeomtry.bufsize = 0;
+		delete m_GTGeometry.bufferdata;
+		m_GTGeometry.bufferdata = NULL;
+		m_GTGeometry.bufsize = 0;
 	}
 
 	if (m_GTTexture.bufferdata)
 	{
 		delete m_GTTexture.bufferdata;
 		m_GTTexture.bufferdata = NULL;
-		m_GTGeomtry.bufsize = 0;
+		m_GTGeometry.bufsize = 0;
 	}
 
 }
@@ -181,7 +181,7 @@ bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, G
 	}
 	else if (TableType == GTGeometry)
 	{
-		if (m_GTGeomtry.bufferdata != NULL)
+		if (m_GTGeometry.bufferdata != NULL)
 			return true;
 	}
 	else if (TableType == GTTexture)
@@ -227,7 +227,7 @@ bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, G
 			}
 			else if (TableType == GTGeometry)
 			{
-				m_GTGeomtry = fin;
+				m_GTGeometry = fin;
 			}
 			else if (TableType == GTTexture)
 			{
@@ -262,11 +262,11 @@ bool CDB_Global::Get_Media(const std::string &mediaId, std::stringstream &fin)
 		{
 			GSMediaMemory myMem = m_GSGeometryMap[stringkey];
 			if (!fin.write(myMem.bufferdata, myMem.bufsize))
-#ifdef _DEBUG
 			{
+#ifdef _DEBUG
 				++fubar;
-			}
 #endif
+			}
 			fin.seekg(0, std::ios::beg);
 		}
 		else
@@ -281,16 +281,44 @@ bool CDB_Global::Get_Media(const std::string &mediaId, std::stringstream &fin)
 		{
 			GSMediaMemory myMem = m_GSTextureMap[stringkey];
 			if (!fin.write(myMem.bufferdata, myMem.bufsize))
-#ifdef _DEBUG
 			{
+#ifdef _DEBUG
 				++fubar;
-			}
 #endif
+			}
 			fin.seekg(0, std::ios::beg);
 			m_doneList.push_back(stringkey);
 		}
 		else
 			return false;
+	}
+	else if (TableType == GTGeometry)
+	{
+		if (m_GTGeometry.bufferdata)
+		{
+			if (!fin.write(m_GTGeometry.bufferdata, m_GTGeometry.bufsize))
+			{
+#ifdef _DEBUG
+				++fubar;
+#endif
+			}
+			fin.seekg(0, std::ios::beg);
+
+		}
+	}
+	else if (TableType == GTTexture)
+	{
+		if (m_GTTexture.bufferdata)
+		{
+			if (!fin.write(m_GTTexture.bufferdata, m_GTTexture.bufsize))
+			{
+#ifdef _DEBUG
+				++fubar;
+#endif
+			}
+			fin.seekg(0, std::ios::beg);
+
+		}
 	}
 	else
 	{
@@ -411,6 +439,10 @@ bool CDB_Global::ParseGSKey(const std::string &mediaId, GSMediaKey &Key, std::st
 	}
 	else
 	{
+		pos = tablename.find(".zip");
+		if (pos == std::string::npos)
+			return false;
+		tablename = tablename.substr(0, pos);
 		lod = 0;
 		uref = 0;
 		rref = 0;
