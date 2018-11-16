@@ -38,11 +38,11 @@ CDB_Global CDB_Global_Instance;
 
 CDB_Global::CDB_Global() : m_ogrDataset(NULL)
 {
-	int s_BaseMapLodNum = 0;
-	bool s_EnableBathymetry = true;
-	bool s_LOD0_GS_FullStack = false;
-	bool s_LOD0_GT_FullStack = false;
-	bool s_CDB_Tile_Be_Verbose = false;
+	s_BaseMapLodNum = 0;
+	s_EnableBathymetry = true;
+	s_LOD0_GS_FullStack = false;
+	s_LOD0_GT_FullStack = false;
+	s_CDB_Tile_Be_Verbose = false;
 	m_doneList.clear();
 }
 
