@@ -877,6 +877,8 @@ class ReaderWriterTIFF : public osgDB::ReaderWriter
             int samplesPerPixel;
             int bitsPerSample;
             uint16 photometric;
+			bool hasExtraSamples = false;
+			uint16 extraSamples[1];
 
             image = TIFFClientOpen("outputstream", "w", (thandle_t)&fout,
                                     libtiffOStreamReadProc, //Custom read function
@@ -901,7 +903,9 @@ class ReaderWriterTIFF : public osgDB::ReaderWriter
                     samplesPerPixel = 1;
                     break;
                 case GL_LUMINANCE_ALPHA:
-                case GL_RG:
+					hasExtraSamples = true;
+					extraSamples[0] = EXTRASAMPLE_UNASSALPHA;
+				case GL_RG:
                     photometric = PHOTOMETRIC_MINISBLACK;
                     samplesPerPixel = 2;
                     break;
@@ -912,6 +916,8 @@ class ReaderWriterTIFF : public osgDB::ReaderWriter
                 case GL_RGBA:
                     photometric = PHOTOMETRIC_RGB;
                     samplesPerPixel = 4;
+					hasExtraSamples = true;
+					extraSamples[0] = EXTRASAMPLE_UNASSALPHA;
                     break;
                 default:
                     return WriteResult::ERROR_IN_WRITING_FILE;
@@ -944,6 +950,8 @@ class ReaderWriterTIFF : public osgDB::ReaderWriter
             TIFFSetField(image, TIFFTAG_BITSPERSAMPLE,bitsPerSample);
             TIFFSetField(image, TIFFTAG_SAMPLESPERPIXEL,samplesPerPixel);
             TIFFSetField(image, TIFFTAG_PHOTOMETRIC, photometric);
+			if (hasExtraSamples)
+				TIFFSetField(image, TIFFTAG_EXTRASAMPLES, 1, extraSamples);
             TIFFSetField(image, TIFFTAG_COMPRESSION, compressionType);
             TIFFSetField(image, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
             TIFFSetField(image, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
