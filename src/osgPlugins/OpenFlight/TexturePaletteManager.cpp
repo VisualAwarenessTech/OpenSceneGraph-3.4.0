@@ -170,7 +170,11 @@ TexturePaletteManager::write( DataOutputStream& dos ) const
 			else if (_fltOpt.getRemapTextureFilePath() == ExportOptions::ToRGBwEdit)
 			{
 				std::string endFileName = osgDB::getSimpleFileName(texture->getImage()->getFileName());
-				endFileName = Strip2nth("_", endFileName, 7);
+				int count = 7;
+				size_t fd = endFileName.find("_AL015_000_6_");
+				if (fd != std::string::npos)
+					count = 11;
+				endFileName = Strip2nth("_", endFileName, count);
 				fileName = _fltOpt.getTextureRemapPredicate() + endFileName;
 			}
 
