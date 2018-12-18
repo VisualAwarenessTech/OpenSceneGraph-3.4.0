@@ -1,0 +1,54 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2011
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Applications osgviewer", "applications\osgviewer\application_osgviewer.vcxproj", "{8869A14E-1A2F-440F-8A52-F2153FD9DA31}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+		vs2015_Debug|x64 = vs2015_Debug|x64
+		vs2015_Debug|x86 = vs2015_Debug|x86
+		vs2015_Release|x64 = vs2015_Release|x64
+		vs2015_Release|x86 = vs2015_Release|x86
+		vs2017_Debug|x64 = vs2017_Debug|x64
+		vs2017_Debug|x86 = vs2017_Debug|x86
+		vs2017_Release|x64 = vs2017_Release|x64
+		vs2017_Release|x86 = vs2017_Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.Debug|x64.ActiveCfg = Debug|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.Debug|x64.Build.0 = Debug|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.Debug|x86.ActiveCfg = Debug|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.Debug|x86.Build.0 = Debug|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.Release|x64.ActiveCfg = Release|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.Release|x64.Build.0 = Release|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.Release|x86.ActiveCfg = Release|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.Release|x86.Build.0 = Release|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2015_Debug|x64.ActiveCfg = vs2015_Debug|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2015_Debug|x64.Build.0 = vs2015_Debug|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2015_Debug|x86.ActiveCfg = vs2015_Debug|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2015_Debug|x86.Build.0 = vs2015_Debug|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2015_Release|x64.ActiveCfg = vs2015_Release|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2015_Release|x64.Build.0 = vs2015_Release|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2015_Release|x86.ActiveCfg = vs2015_Release|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2015_Release|x86.Build.0 = vs2015_Release|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2017_Debug|x64.ActiveCfg = vs2017_Debug|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2017_Debug|x64.Build.0 = vs2017_Debug|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2017_Debug|x86.ActiveCfg = vs2017_Debug|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2017_Debug|x86.Build.0 = vs2017_Debug|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2017_Release|x64.ActiveCfg = vs2017_Release|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2017_Release|x64.Build.0 = vs2017_Release|x64
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2017_Release|x86.ActiveCfg = vs2017_Release|Win32
+		{8869A14E-1A2F-440F-8A52-F2153FD9DA31}.vs2017_Release|x86.Build.0 = vs2017_Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {833B0867-EFB8-4BC5-A24A-1222AA94739A}
+	EndGlobalSection
+EndGlobal
