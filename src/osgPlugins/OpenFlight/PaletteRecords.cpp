@@ -496,7 +496,7 @@ protected:
 				if(pathname.empty())
 					pathname = osgDB::findDataFile(filename, document.getOptions());
 				if(pathname.empty())
-					OSG_WARN << "Texture File " << filename << " " << archivePath <<" not found GT Tex or in archive" << std::endl;
+					OSG_WARN << "Texture File " << filename << " " << archivePath <<" not found GT Tex or in archive" << document.ArchiveFileName() << std::endl;
 			}
 			else
 				pathname = osgDB::findDataFile(filename, document.getOptions());;

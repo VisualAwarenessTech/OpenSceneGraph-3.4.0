@@ -215,6 +215,7 @@ class Document
 
 		//Common DataBase (CDB) support functions
 		bool OpenArchive(std::string ArchiveName);
+		std::string ArchiveFileName(void);
 		bool MapTextureName2Archive(std::string &textureName);
 		std::string  archive_findDataFile(std::string &filename);
 		osg::ref_ptr<osg::Image> readArchiveImage(const std::string filename);
