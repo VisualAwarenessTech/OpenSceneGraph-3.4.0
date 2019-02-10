@@ -495,8 +495,10 @@ protected:
 				pathname = document.archive_findDataFile(archivePath);
 				if(pathname.empty())
 					pathname = osgDB::findDataFile(filename, document.getOptions());
+				//If you change the format of the next message you must make an equivalent chagne in CCDB_Model_Mgr
+				//Do not change the start of the line "Texture File" as it is a key in the osgNotifyHandler
 				if(pathname.empty())
-					OSG_WARN << "Texture File " << filename << " " << archivePath <<" not found GT Tex or in archive" << document.ArchiveFileName() << std::endl;
+					OSG_WARN << "Texture File " << filename << " " << archivePath <<" not found GT Tex or in archive " << document.ArchiveFileName() << std::endl;
 			}
 			else
 				pathname = osgDB::findDataFile(filename, document.getOptions());;
