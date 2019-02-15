@@ -224,8 +224,10 @@ FltExportVisitor::apply( osg::LOD& lodNode )
         // Switch-in/switch-out distances may vary per child
         double switchInDist = lodNode.getMaxRange(i);
         double switchOutDist = lodNode.getMinRange(i);
+		lodNode.computeBound();
+		double sigsize = lodNode.getRadius();
 
-        writeLevelOfDetail( lodNode, center, switchInDist, switchOutDist);
+        writeLevelOfDetail( lodNode, center, switchInDist, switchOutDist, sigsize);
         writeMatrix( lodNode.getUserData() );
         writeComment( lodNode );
 

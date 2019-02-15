@@ -454,7 +454,8 @@ void
 FltExportVisitor::writeLevelOfDetail( const osg::LOD& lod,
                                     osg::Vec3d const& center,
                                     double switchInDist,
-                                    double switchOutDist)
+                                    double switchOutDist,
+									double sigsize)
 {
     uint16 length( 80 );
     IdHelper id(*this, lod.getName() );
@@ -472,7 +473,7 @@ FltExportVisitor::writeLevelOfDetail( const osg::LOD& lod,
     _records->writeFloat64( center.y() );
     _records->writeFloat64( center.z() );
     _records->writeFloat64( 0 );               // Transition range
-    _records->writeFloat64( 0 );               // Significant size
+    _records->writeFloat64( sigsize );               // Significant size
 
 }
 

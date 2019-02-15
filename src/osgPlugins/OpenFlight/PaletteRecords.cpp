@@ -487,6 +487,7 @@ protected:
 
         // Need full path for unique key in local texture cache.
 		std::string pathname;
+		bool missingmessagesent = false;
 		if (document.getTextureInArchive())
 		{
 			std::string archivePath = filename;
@@ -495,8 +496,13 @@ protected:
 				pathname = document.archive_findDataFile(archivePath);
 				if(pathname.empty())
 					pathname = osgDB::findDataFile(filename, document.getOptions());
-				if(pathname.empty())
-					OSG_WARN << "Texture File " << filename << " " << archivePath <<" not found GT Tex or in archive" << std::endl;
+				//If you change the format of the next message you must make an equivalent chagne in CCDB_Model_Mgr
+				//Do not change the start of the line "Texture File" as it is a key in the osgNotifyHandler
+				if (pathname.empty())
+				{
+					OSG_WARN << "Texture File " << filename << " " << archivePath << " not found GT Tex or in archive " << document.ArchiveFileName() << std::endl;
+					missingmessagesent = true;
+				}
 			}
 			else
 				pathname = osgDB::findDataFile(filename, document.getOptions());;
@@ -516,7 +522,8 @@ protected:
  
 		if (pathname.empty())
         {
-            OSG_WARN << "Can't find texture (" << index << ") " << filename << std::endl;
+			if(!missingmessagesent)
+				OSG_WARN << "Can't find texture (" << index << ") " << filename << std::endl;
             return;
         }
 

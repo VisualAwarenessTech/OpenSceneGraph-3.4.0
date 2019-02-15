@@ -136,6 +136,11 @@ osg::PolygonOffset* Document::getSubSurfacePolygonOffset(int level)
     return po.get();
 }
 
+std::string Document::ArchiveFileName(void)
+{
+	return _Archive_FileName;
+}
+
 bool Document::OpenArchive(std::string ArchiveName)
 {
 	_Archive = osgDB::openArchive(ArchiveName, osgDB::ReaderWriter::READ);
