@@ -88,6 +88,17 @@ enum Ellipsoid {
     NAD_1927 = 4
 };
 
+struct EArchives
+{
+	osg::ref_ptr<osgDB::Archive> _Archive;
+	std::string					 _Archive_FileName;
+	std::string					 _Archive_KeyName;
+	osgDB::Archive::FileNameList _Archive_FileList;
+	EArchives() : _Archive(NULL), _Archive_FileName(""), _Archive_KeyName("")
+	{
+
+	}
+};
 
 class Document
 {
@@ -220,6 +231,10 @@ class Document
 		std::string  archive_findDataFile(std::string &filename);
 		osg::ref_ptr<osg::Image> readArchiveImage(const std::string filename);
 		void archiveRelease(void);
+		std::string archive_findOtherArchive(std::string &filename);
+		bool ParseTexnameToArchive(std::string &Rawtexturename, std::string &ArchiveName, std::string &ArchiveKey, std::string &textureName);
+		bool ArchiveNameFromTexName(std::string &textureName, std::string &ArchiveName);
+
 		bool SetTexture2MapDirectory(std::string DirectoryName, std::string ModelName);
 		bool MapTextureName2Directory(std::string &textureName);
 
@@ -247,6 +262,8 @@ class Document
 		std::string					 _Archive_FileName;
 		std::string					 _Archive_KeyName;
 		osgDB::Archive::FileNameList _Archive_FileList;
+		std::vector<EArchives>		 _Extended_Archives;
+
 		std::string					 _TextureRemapDirectory;
 
         friend class Header;

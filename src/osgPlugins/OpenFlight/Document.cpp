@@ -18,6 +18,8 @@
 //
 
 #include "Document.h"
+#include <osgDB/FileUtils>
+#include <osgDB/FileNameUtils>
 
 using namespace flt;
 
@@ -300,7 +302,53 @@ std::string  Document::archive_findDataFile(std::string &filename)
 			return comp;
 		}
 	}
+
 	return result;
+}
+
+std::string Document::archive_findOtherArchive(std::string &filename)
+{
+	std::string result = "";
+	std::string OtherArchiveName;
+	std::string OtherArchiveKey;
+	std::string OtherArchiveFileName;
+
+	ParseTexnameToArchive(filename, OtherArchiveName, OtherArchiveKey, OtherArchiveFileName);
+
+	return result;
+}
+
+bool Document::ParseTexnameToArchive(std::string &Rawtexturename, std::string &ArchiveName, std::string &ArchiveKey, std::string &textureName)
+{
+	std::string mytextureName = osgDB::getSimpleFileName(Rawtexturename);
+	size_t fpos = Rawtexturename.find(mytextureName);
+	if (fpos == std::string::npos)
+		return false;
+	std::string targetDir = Rawtexturename.substr(0, fpos);
+	std::string ArchiveNameOnly;
+	if (!ArchiveNameFromTexName(mytextureName, ArchiveNameOnly))
+		return false;
+	ArchiveName = targetDir + ArchiveNameOnly;
+	size_t tpos = ArchiveNameOnly.find(".zip");
+	if (tpos == std::string::npos)
+		return false;
+	ArchiveKey = ArchiveNameOnly.substr(0, tpos);
+	textureName = mytextureName;
+	return true;
+}
+
+bool Document::ArchiveNameFromTexName(std::string &textureName, std::string &ArchiveName)
+{
+	size_t len = textureName.length();
+	size_t pos = textureName.find("_R");
+	if (pos == std::string::npos || (pos + 1 >= len))
+		return false;
+	size_t pos2 = textureName.substr(pos + 1).find("_");
+	if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
+		return false;
+	std::string base = textureName.substr(pos + pos2 + 1);
+	ArchiveName = base + ".zip";
+	return true;
 }
 
 osg::ref_ptr<osg::Image> Document::readArchiveImage(const std::string filename)

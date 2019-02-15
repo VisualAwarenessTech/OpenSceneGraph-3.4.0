@@ -494,14 +494,18 @@ protected:
 			if (document.MapTextureName2Archive(archivePath))
 			{
 				pathname = document.archive_findDataFile(archivePath);
+				//Ok if it is not in the archive then look for it as a geotypical texture
 				if(pathname.empty())
 					pathname = osgDB::findDataFile(filename, document.getOptions());
+
 				//If you change the format of the next message you must make an equivalent chagne in CCDB_Model_Mgr
 				//Do not change the start of the line "Texture File" as it is a key in the osgNotifyHandler
 				if (pathname.empty())
 				{
 					OSG_WARN << "Texture File " << filename << " " << archivePath << " not found GT Tex or in archive " << document.ArchiveFileName() << std::endl;
 					missingmessagesent = true;
+//					std::string otherArchivePath = filename;
+//					pathname = document.archive_findOtherArchive(otherArchivePath);
 				}
 			}
 			else
