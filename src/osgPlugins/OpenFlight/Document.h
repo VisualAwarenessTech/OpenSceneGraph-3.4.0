@@ -29,6 +29,7 @@
 #include <osgDB/ReaderWriter>
 #include <osgDB/Archive>
 #include <osgDB/Options>
+#include <osgDB/FileNameUtils>
 
 #include "Types.h"
 #include "Record.h"
@@ -221,6 +222,7 @@ class Document
 		void archiveRelease(void);
 		bool SetTexture2MapDirectory(std::string DirectoryName, std::string ModelName);
 		bool MapTextureName2Directory(std::string &textureName);
+		bool SetModelExportTextureDirectory(std::string DirectoryName, std::string ModelDirectory);
 
     protected:
 
@@ -247,6 +249,7 @@ class Document
 		std::string					 _Archive_KeyName;
 		osgDB::Archive::FileNameList _Archive_FileList;
 		std::string					 _TextureRemapDirectory;
+		std::string					 _ModelHomeDirectory;
 
         friend class Header;
         bool _done;
