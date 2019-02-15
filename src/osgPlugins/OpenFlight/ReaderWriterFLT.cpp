@@ -476,7 +476,8 @@ class FLTReaderWriter : public ReaderWriter
 								break;
 							}
 						}
-					}
+						document.SetModelExportTextureDirectory(dbpaths[1], dbpaths[0]);
+					}					
 					else
 						document.setRemap2Directory(false);
 				}

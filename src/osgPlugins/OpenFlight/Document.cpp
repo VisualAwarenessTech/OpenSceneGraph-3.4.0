@@ -53,7 +53,8 @@ Document::Document() :
 	_Archive(NULL),
 	_Archive_FileName(""),
 	_Archive_KeyName(""),
-	_TextureRemapDirectory("")
+	_TextureRemapDirectory(""),
+	_ModelHomeDirectory("")
 {
     _subsurfaceDepth = new osg::Depth(osg::Depth::LESS, 0.0, 1.0,false);
 }
@@ -228,28 +229,54 @@ bool Document::MapTextureName2Directory(std::string &textureName)
 {
 	if (!_TextureRemapDirectory.empty())
 	{
-		std::string workingname = textureName;
-		size_t fpos = workingname.rfind("\\");
-		if ((fpos != std::string::npos) && (fpos+1 < workingname.length()))
-			workingname = workingname.substr(fpos + 1);
+		if (_Archive_KeyName.empty())
+		{
+			std::string workingname = osgDB::getSimpleFileName(textureName);
+			size_t len = workingname.length();
+			size_t pos = workingname.find("_R");
+			if (pos == std::string::npos || (pos + 1 >= len))
+				return false;
+			size_t pos2 = workingname.substr(pos + 1).find("_");
+			if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
+				return false;
+			std::string base = workingname.substr(pos + pos2 + 2);
+			textureName = _TextureRemapDirectory + "/" + base;
+			std::string existDir = _ModelHomeDirectory + "/" + textureName;
+			if (osgDB::fileExists(existDir))
+				return true;
+		}
+		else
+		{
+			std::string workingname = textureName;
+			size_t fpos = workingname.rfind("\\");
+			if ((fpos != std::string::npos) && (fpos + 1 < workingname.length()))
+				workingname = workingname.substr(fpos + 1);
 
-		size_t len = workingname.length();
-		size_t pos = workingname.find("_R");
-		if (pos == std::string::npos || (pos + 1 >= len))
-			return false;
-		size_t pos2 = workingname.substr(pos + 1).find("_");
-		if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
-			return false;
-		std::string base = workingname.substr(pos + pos2 + 1);
-		std::string mappedname = _TextureRemapDirectory;
-		mappedname.append("\\");
-		mappedname.append(_Archive_KeyName);
-		mappedname.append(base);
-		textureName = mappedname;
-		if (osgDB::fileExists(textureName))
-			return true;
+			size_t len = workingname.length();
+			size_t pos = workingname.find("_R");
+			if (pos == std::string::npos || (pos + 1 >= len))
+				return false;
+			size_t pos2 = workingname.substr(pos + 1).find("_");
+			if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
+				return false;
+			std::string base = workingname.substr(pos + pos2 + 1);
+			std::string mappedname = _TextureRemapDirectory;
+			mappedname.append("\\");
+			mappedname.append(_Archive_KeyName);
+			mappedname.append(base);
+			textureName = mappedname;
+			if (osgDB::fileExists(textureName))
+				return true;
+		}
 	}
 	return false;
+}
+
+bool flt::Document::SetModelExportTextureDirectory(std::string DirectoryName, std::string ModelDirectory)
+{
+	_TextureRemapDirectory = DirectoryName;
+	_ModelHomeDirectory = ModelDirectory;
+	return true;
 }
 
 
