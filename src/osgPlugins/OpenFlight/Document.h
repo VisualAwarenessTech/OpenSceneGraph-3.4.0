@@ -219,6 +219,12 @@ class Document
 		void setRemap2Directory(bool flag) { _remap2Directory = flag; }
 		bool getRemap2Directory() const { return _remap2Directory; }
 
+		void setCDB_Verify(bool flag) { _CDB_Verify = flag; }
+		bool getCDB_Verify() const { return _CDB_Verify; }
+
+		void setCDBModel_Has_Sigsize(bool flag) { _CDBModel_Has_Sigsize = flag; }
+		bool getCDBModel_Has_Sigsize() const { return _CDBModel_Has_Sigsize; }
+
 		void setReadObjectRecordData(bool flag) { _readObjectRecordData = flag; }
         bool getReadObjectRecordData() const { return _readObjectRecordData; }
 
@@ -256,6 +262,8 @@ class Document
         bool                        _preserveNonOsgAttrsAsUserData;
 		bool						_textureInarchive;
 		bool						_remap2Directory;
+		bool						_CDB_Verify;
+		bool						_CDBModel_Has_Sigsize;
         CoordUnits                  _desiredUnits;
 
         bool                        _keepExternalReferences;
@@ -265,6 +273,7 @@ class Document
 		std::string					 _Archive_KeyName;
 		osgDB::Archive::FileNameList _Archive_FileList;
 		std::vector<EArchives>		 _Extended_Archives;
+		osgDB::Archive *			 _ActiveArchive;
 
 		std::string					 _TextureRemapDirectory;
 		std::string					 _ModelHomeDirectory;
@@ -308,6 +317,10 @@ class Document
 
         typedef std::map<int,osg::ref_ptr<osg::Node> > InstanceDefinitionMap;
         InstanceDefinitionMap _instanceDefinitionMap;
+
+		bool Validate_Archive_Name(std::string &ArchiveName);
+		bool Have_Ext_Archive(std::string ArchiveName, EArchives &ArchiveRec);
+
 };
 
 

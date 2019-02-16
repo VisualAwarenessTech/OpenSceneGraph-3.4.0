@@ -502,10 +502,23 @@ protected:
 				//Do not change the start of the line "Texture File" as it is a key in the osgNotifyHandler
 				if (pathname.empty())
 				{
-					OSG_WARN << "Texture File " << filename << " " << archivePath << " not found GT Tex or in archive " << document.ArchiveFileName() << std::endl;
-					missingmessagesent = true;
-//					std::string otherArchivePath = filename;
-//					pathname = document.archive_findOtherArchive(otherArchivePath);
+					std::string otherArchivePath = filename;
+					pathname = document.archive_findOtherArchive(otherArchivePath);
+					if (!pathname.empty())
+					{
+						if (document.getCDB_Verify())
+						{
+							OSG_WARN << "Texture File " << filename << " " << archivePath << " not found GT Tex or in archive " << document.ArchiveFileName() << std::endl;
+							missingmessagesent = true;
+							OSG_WARN << "Texture File " << filename << " found in alternate archive " << std::endl;
+						}
+					}
+					else
+					{
+						OSG_WARN << "Texture File " << filename << " " << archivePath << " not found GT Tex or in archive " << document.ArchiveFileName() << std::endl;
+						missingmessagesent = true;
+						OSG_WARN << "Texture File " << filename << " Not found in alternate archive " << std::endl;
+					}
 				}
 			}
 			else

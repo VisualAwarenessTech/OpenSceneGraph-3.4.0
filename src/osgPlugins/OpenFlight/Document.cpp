@@ -25,36 +25,39 @@ using namespace flt;
 
 
 Document::Document() :
-    _replaceClampWithClampToEdge(false),
-    _preserveFace(false),
-    _preserveObject(false),
-    _replaceDoubleSidedPolys(false),
-    _defaultDOFAnimationState(false),
-    _useTextureAlphaForTransparancyBinning(true),
-    _useBillboardCenter(false),
-    _doUnitsConversion(true),
-    _readObjectRecordData(false),
-    _preserveNonOsgAttrsAsUserData(false),
-    _desiredUnits(METERS),
-    _done(false),
-    _level(0),
-    _subfaceLevel(0),
-    _unitScale(1.0),
-    _version(0),
-    _colorPoolParent(false),
-    _texturePoolParent(false),
-    _materialPoolParent(false),
-    _lightSourcePoolParent(false),
-    _lightPointAppearancePoolParent(false),
-    _lightPointAnimationPoolParent(false),
-    _shaderPoolParent(false),
+	_replaceClampWithClampToEdge(false),
+	_preserveFace(false),
+	_preserveObject(false),
+	_replaceDoubleSidedPolys(false),
+	_defaultDOFAnimationState(false),
+	_useTextureAlphaForTransparancyBinning(true),
+	_useBillboardCenter(false),
+	_doUnitsConversion(true),
+	_readObjectRecordData(false),
+	_preserveNonOsgAttrsAsUserData(false),
+	_desiredUnits(METERS),
+	_done(false),
+	_level(0),
+	_subfaceLevel(0),
+	_unitScale(1.0),
+	_version(0),
+	_colorPoolParent(false),
+	_texturePoolParent(false),
+	_materialPoolParent(false),
+	_lightSourcePoolParent(false),
+	_lightPointAppearancePoolParent(false),
+	_lightPointAnimationPoolParent(false),
+	_shaderPoolParent(false),
 	_textureInarchive(false),
 	_remap2Directory(false),
 	_Archive(NULL),
 	_Archive_FileName(""),
 	_Archive_KeyName(""),
 	_TextureRemapDirectory(""),
-	_ModelHomeDirectory("")
+	_ModelHomeDirectory(""),
+	_ActiveArchive(NULL),
+	_CDB_Verify(false),
+	_CDBModel_Has_Sigsize(false)
 {
     _subsurfaceDepth = new osg::Depth(osg::Depth::LESS, 0.0, 1.0,false);
 }
@@ -148,6 +151,7 @@ bool Document::OpenArchive(std::string ArchiveName)
 	_Archive = osgDB::openArchive(ArchiveName, osgDB::ReaderWriter::READ);
 	if (_Archive)
 	{
+		_ActiveArchive = _Archive;
 		_Archive->getFileNames(_Archive_FileList);
 		_Archive_FileName = ArchiveName;
 		if (_Archive_FileName.substr(0, 5) == "gpkg:")
@@ -326,6 +330,7 @@ std::string  Document::archive_findDataFile(std::string &filename)
 		const std::string comp = *f;
 		if (comp.find(filename) != std::string::npos)
 		{
+			_ActiveArchive = _Archive;
 			return comp;
 		}
 	}
@@ -340,9 +345,47 @@ std::string Document::archive_findOtherArchive(std::string &filename)
 	std::string OtherArchiveKey;
 	std::string OtherArchiveFileName;
 
-	ParseTexnameToArchive(filename, OtherArchiveName, OtherArchiveKey, OtherArchiveFileName);
+	if (ParseTexnameToArchive(filename, OtherArchiveName, OtherArchiveKey, OtherArchiveFileName))
+	{
+		EArchives Erec;
+		if (!Have_Ext_Archive(OtherArchiveName, Erec))
+		{
+			if (!osgDB::fileExists(OtherArchiveName))
+				return result;
+			Erec._Archive_FileName = OtherArchiveName;
+			Erec._Archive_KeyName = OtherArchiveKey;
+			Erec._Archive = osgDB::openArchive(OtherArchiveName, osgDB::ReaderWriter::READ);
+			if (Erec._Archive)
+			{
+				Erec._Archive->getFileNames(Erec._Archive_FileList);
+				_Extended_Archives.push_back(Erec);
+			}
+		}
+		for (osgDB::Archive::FileNameList::const_iterator f = Erec._Archive_FileList.begin(); f != Erec._Archive_FileList.end(); ++f)
+		{
+			const std::string comp = *f;
+			if (comp.find(OtherArchiveFileName) != std::string::npos)
+			{
+				_ActiveArchive = Erec._Archive;
+				return comp;
+			}
+		}
+	}
 
 	return result;
+}
+
+bool Document::Have_Ext_Archive(std::string ArchiveName, EArchives &ArchiveRec)
+{
+	for each (EArchives E in _Extended_Archives)
+	{
+		if (E._Archive_FileName == ArchiveName)
+		{
+			ArchiveRec = E;
+			return true;
+		}
+	}
+	return false;
 }
 
 bool Document::ParseTexnameToArchive(std::string &Rawtexturename, std::string &ArchiveName, std::string &ArchiveKey, std::string &textureName)
@@ -355,12 +398,43 @@ bool Document::ParseTexnameToArchive(std::string &Rawtexturename, std::string &A
 	std::string ArchiveNameOnly;
 	if (!ArchiveNameFromTexName(mytextureName, ArchiveNameOnly))
 		return false;
-	ArchiveName = targetDir + ArchiveNameOnly;
+	Validate_Archive_Name(ArchiveNameOnly);
+	std::string RelitiveArchiveName = targetDir + ArchiveNameOnly;
+	size_t tilepos1 = RelitiveArchiveName.find("\\Tiles");
+	if (tilepos1 == std::string::npos)
+		return false;
+	size_t tilepos2 = _Archive_FileName.find("\\Tiles");
+	if (tilepos2 == std::string::npos)
+		return false;
+	ArchiveName = _Archive_FileName.substr(0, tilepos2) + RelitiveArchiveName.substr(tilepos1);
 	size_t tpos = ArchiveNameOnly.find(".zip");
 	if (tpos == std::string::npos)
 		return false;
 	ArchiveKey = ArchiveNameOnly.substr(0, tpos);
 	textureName = mytextureName;
+	return true;
+}
+
+bool Document::Validate_Archive_Name(std::string &ArchiveName)
+{
+	size_t spos = ArchiveName.find("_S001");
+	if (spos == std::string::npos)
+	{
+		spos = ArchiveName.find("_S");
+		if (spos == std::string::npos)
+			return false;
+		ArchiveName = ArchiveName.replace(spos, 5, "_S001");
+	}
+
+	size_t tpos = ArchiveName.find("_T001");
+	if (tpos == std::string::npos)
+	{
+		tpos = ArchiveName.find("_T");
+		if (tpos == std::string::npos)
+			return false;
+		ArchiveName = ArchiveName.replace(tpos, 5, "_T001");
+	}
+
 	return true;
 }
 
@@ -373,16 +447,18 @@ bool Document::ArchiveNameFromTexName(std::string &textureName, std::string &Arc
 	size_t pos2 = textureName.substr(pos + 1).find("_");
 	if ((pos2 == std::string::npos) || (pos + pos2 + 1 >= len))
 		return false;
-	std::string base = textureName.substr(pos + pos2 + 1);
+	std::string base = textureName.substr(0, pos + pos2 + 1);
 	ArchiveName = base + ".zip";
 	return true;
 }
 
 osg::ref_ptr<osg::Image> Document::readArchiveImage(const std::string filename)
 {
-	if (_Archive)
+	if (_ActiveArchive == NULL)
+		_ActiveArchive = _Archive;
+	if (_ActiveArchive)
 	{
-		osgDB::ReaderWriter::ReadResult r = _Archive->readImage(filename, getOptions());
+		osgDB::ReaderWriter::ReadResult r = _ActiveArchive->readImage(filename, getOptions());
 		if (r.validImage())
 		{
 			r.getImage()->setFileName(filename);
@@ -398,6 +474,11 @@ void Document::archiveRelease(void)
 	{
 		_Archive.release();
 	}
+	for each (EArchives E in _Extended_Archives)
+	{
+		E._Archive.release();
+	}
+	_Extended_Archives.clear();
 }
 
 double flt::unitsToMeters(CoordUnits unit)
