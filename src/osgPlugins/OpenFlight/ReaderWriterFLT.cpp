@@ -594,7 +594,14 @@ class FLTReaderWriter : public ReaderWriter
 
 			if (document.getTextureInArchive())
 				document.archiveRelease();
+			if (document.getCDB_Verify())
+			{
+				if (!document.getCDBModel_Has_Sigsize())
+				{
+					OSG_WARN << "Model File did not contain Significant Size Information" << std::endl;
 
+				}
+			}
             return document.getHeaderNode();
         }
 

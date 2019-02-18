@@ -360,6 +360,10 @@ std::string Document::archive_findOtherArchive(std::string &filename)
 				Erec._Archive->getFileNames(Erec._Archive_FileList);
 				_Extended_Archives.push_back(Erec);
 			}
+			else
+			{
+				OSG_WARN << "Archive File " << OtherArchiveName << " Exists but could not be opend"  << std::endl;
+			}
 		}
 		for (osgDB::Archive::FileNameList::const_iterator f = Erec._Archive_FileList.begin(); f != Erec._Archive_FileList.end(); ++f)
 		{
