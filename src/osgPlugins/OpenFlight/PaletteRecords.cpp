@@ -492,6 +492,14 @@ protected:
 		if (document.getTextureInArchive())
 		{
 			std::string archivePath = filename;
+			if (document.getCDB_Verify())
+			{
+				size_t bpos = archivePath.find("_D902");
+				if (bpos != std::string::npos)
+				{
+					OSG_WARN << "Texture File " << filename << " " << archivePath << " contains invalid dataset key" << std::endl;
+				}
+			}
 			if (document.MapTextureName2Archive(archivePath))
 			{
 				pathname = document.archive_findDataFile(archivePath);
