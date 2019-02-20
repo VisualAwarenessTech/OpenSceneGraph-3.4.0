@@ -476,11 +476,15 @@ void Document::archiveRelease(void)
 {
 	if (_Archive)
 	{
+		osgDB::closeArchive(_Archive, true);
 		_Archive.release();
+		_Archive = NULL;
 	}
 	for each (EArchives E in _Extended_Archives)
 	{
+		osgDB::closeArchive(E._Archive, true);
 		E._Archive.release();
+		E._Archive = NULL;
 	}
 	_Extended_Archives.clear();
 }

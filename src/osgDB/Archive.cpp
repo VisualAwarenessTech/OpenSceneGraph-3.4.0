@@ -45,6 +45,11 @@ bool osgDB::closeArchive(const std::string& filename)
 	return osgDB::Registry::instance()->closeArchive(filename);
 }
 
+bool osgDB::closeArchive(osgDB::Archive * ar, bool force)
+{
+	return osgDB::Registry::instance()->closeArchive(ar, force);
+}
+
 Archive::Archive()
 {
     OSG_INFO<<"Archive::Archive() open"<<std::endl;

@@ -520,16 +520,14 @@ protected:
 					{
 						if (document.getCDB_Verify())
 						{
-							OSG_WARN << "Texture File " << filename << " " << archivePath << " not found GT Tex or in archive " << document.ArchiveFileName() << std::endl;
+							OSG_WARN << "Texture File " << filename << " " << archivePath << " not found GT Tex or in archive " << document.ArchiveFileName() << " found in alternate archive" << std::endl;
 							missingmessagesent = true;
-							OSG_WARN << "Texture " << filename << " found in alternate archive " << std::endl;
 						}
 					}
 					else
 					{
-						OSG_WARN << "Texture File " << filename << " " << archivePath << " not found GT Tex or in archive " << document.ArchiveFileName() << std::endl;
+						OSG_WARN << "Texture File " << filename << " " << archivePath << " not found GT Tex or in archive " << document.ArchiveFileName() <<  " Not found in alternate archive"  << std::endl;
 						missingmessagesent = true;
-						OSG_WARN << "Texture  " << filename << " Not found in alternate archive " << std::endl;
 					}
 				}
 			}
@@ -563,8 +561,13 @@ protected:
  
 		if (pathname.empty())
         {
-			if(!missingmessagesent)
-				OSG_WARN << "Can't find texture (" << index << ") " << filename << std::endl;
+			if (!missingmessagesent)
+			{
+				if(document.getCDB_Verify())
+					OSG_WARN << "Missing Texture texture (" << index << ") " << filename << std::endl;
+				else
+					OSG_WARN << "Can't find texture (" << index << ") " << filename << std::endl;
+			}
             return;
         }
 

@@ -104,7 +104,7 @@ std::string ZipArchive::getArchiveFileName() const
     std::string result;
     if( _zipLoaded )
     {
-        result = _mainRecord.name;
+		result = _filename;
     }
     return result;
 }

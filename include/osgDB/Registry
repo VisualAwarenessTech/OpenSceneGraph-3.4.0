@@ -209,6 +209,8 @@ class OSGDB_EXPORT Registry : public osg::Referenced
 			return closeArchiveImplementation(fileName);
 		}
 
+		bool closeArchive(osgDB::Archive * ar, bool force);
+
         ReaderWriter::ReadResult openArchiveImplementation(const std::string& fileName, ReaderWriter::ArchiveStatus status, unsigned int indexBlockSizeHint, const Options* options);
 
 		bool Registry::closeArchiveImplementation(const std::string& fileName);

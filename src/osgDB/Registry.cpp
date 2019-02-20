@@ -1321,12 +1321,25 @@ ReaderWriter::ReadResult Registry::openArchiveImplementation(const std::string& 
     return result;
 }
 
+bool Registry::closeArchive(osgDB::Archive * ar, bool force)
+{
+	std::string Name = ar->getArchiveFileName();
+	osg::ref_ptr<osgDB::Archive> archive = getAndRemoveRefFromArchiveCache(Name);
+	ar->close(force);
+	
+	if (archive.release())
+		return true;
+	else
+		return false;
+}
+
 bool Registry::closeArchiveImplementation(const std::string& fileName)
 {
 	osg::ref_ptr<osgDB::Archive> archive = getAndRemoveRefFromArchiveCache(fileName);
 	if (archive.valid())
 	{
 		archive->close(true);
+		archive.release();
 		return true;
 	}
 

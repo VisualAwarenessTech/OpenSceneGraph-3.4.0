@@ -433,12 +433,14 @@ protected:
                     _primaryColor = document.getColorPool()->getColor(primaryNameIndex);
 
                 else // >= VERSION_15_1
-                    _primaryColor = document.getColorPool()->getColor(primaryColorIndex);
+					_primaryColor = osg::Vec4(1, 1, 1, 1);
+//				_primaryColor = document.getColorPool()->getColor(primaryColorIndex);
             }
         }
 
         // Lighting
-        stateset->setMode(GL_LIGHTING, isLit() ? osg::StateAttribute::ON : osg::StateAttribute::OFF);
+		bool lit = isLit();
+        stateset->setMode(GL_LIGHTING, lit ? osg::StateAttribute::ON : osg::StateAttribute::OFF);
 
         // Material
         if (isLit() || materialIndex>=0)
@@ -447,6 +449,13 @@ protected:
             // http://www.multigen-paradigm.com/ubb/Forum1/HTML/000228.html
             osg::Vec4 col = _primaryColor;
             col.a() = 1.0f - getTransparency();
+#if 0
+			if (materialIndex < 0)
+			{
+				if (document.getOrCreateMaterialPool()->size() > 0)
+					materialIndex = 0;
+			}
+#endif
             osg::Material* material = document.getOrCreateMaterialPool()->getOrCreateMaterial(materialIndex,col);
             stateset->setAttribute(material);
         }
