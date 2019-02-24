@@ -34,7 +34,7 @@ Document::Document() :
 	_useBillboardCenter(false),
 	_doUnitsConversion(true),
 	_readObjectRecordData(false),
-	_preserveNonOsgAttrsAsUserData(false),
+	_preserveNonOsgAttrsAsUserData(true),
 	_desiredUnits(METERS),
 	_done(false),
 	_level(0),
