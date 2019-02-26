@@ -487,11 +487,18 @@ FltExportVisitor::writeMesh( const osg::Geode& geode, const osg::Geometry& geom 
     uint16 length( 84 );
     IdHelper id( *this, geode.getName() );
 
+	int32 IRColor = 0;
+	geom.getUserValue("<UA:IRC>", IRColor);
+	int16 surface = 0;
+	geom.getUserValue("<UA:SMC>", surface);
+	int16 feature = 0;
+	geom.getUserValue("<UA:FID>", feature);
+
     _records->writeInt16( (int16) MESH_OP );
     _records->writeUInt16( length );
     _records->writeID( id );
     _records->writeInt32( 0 ); // Reserved
-    _records->writeInt32( 0 ); // IR color code
+    _records->writeInt32( IRColor ); // IR color code
     _records->writeInt16( 0 ); // Relative priority
     _records->writeInt8( drawType ); // Draw type
     _records->writeInt8( 0 ); // Texture white
@@ -502,8 +509,8 @@ FltExportVisitor::writeMesh( const osg::Geode& geode, const osg::Geometry& geom 
     _records->writeInt16( -1 ); // Detail texture pattern index
     _records->writeInt16( textureIndex ); // Texture pattern index
     _records->writeInt16( materialIndex ); // Material index
-    _records->writeInt16( 0 ); // Surface material code
-    _records->writeInt16( 0 ); // Feature ID
+    _records->writeInt16( surface ); // Surface material code
+    _records->writeInt16( feature ); // Feature ID
     _records->writeInt32( 0 ); // IR material code
     _records->writeUInt16( transparency ); // Transparency
     _records->writeInt8( 0 ); // LOD generation control

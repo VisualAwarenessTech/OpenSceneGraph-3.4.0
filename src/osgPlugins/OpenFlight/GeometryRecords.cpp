@@ -464,7 +464,7 @@ protected:
         if (document.getPreserveNonOsgAttrsAsUserData() && 0 != IRColor)
         {
           _geometry->setUserValue("<UA:IRC>", IRColor);
-        }
+		}
 
         // surface (SMC)
         if (document.getPreserveNonOsgAttrsAsUserData() && 0 != surface)
@@ -533,6 +533,17 @@ protected:
         if (_parent.valid())
             _parent->addChild(*_geode);
     }
+
+	//The following module forces the linker to not have udefines for these functions in exportGeometryRecoreds
+	virtual void noRecord()
+	{
+		_geometry = new osg::Geometry;
+		int32 IRColor;
+		_geometry->getUserValue("<UA:IRC>", IRColor);
+		int16 Surface;
+		_geometry->getUserValue("<UA:SMC>", Surface);
+
+	}
 
     osg::PrimitiveSet::Mode getPrimitiveSetMode(int numVertices)
     {

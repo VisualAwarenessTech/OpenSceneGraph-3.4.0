@@ -49,6 +49,7 @@
 #include <osgSim/MultiSwitch>
 #include <osgSim/LightPointNode>
 #include <osgSim/ObjectRecordData>
+#include <osg/ValueObject>
 
 #ifdef _MSC_VER
 // Disable this warning. It's OK for us to use 'this' in initializer list,
