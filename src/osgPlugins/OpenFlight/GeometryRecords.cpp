@@ -461,20 +461,23 @@ protected:
         }
 
         // IRColor (IRC)
-        if (document.getPreserveNonOsgAttrsAsUserData() && 0 != IRColor)
-        {
+//      if (document.getPreserveNonOsgAttrsAsUserData() && 0 != IRColor)
+		if(0 != IRColor)
+		{
           _geometry->setUserValue("<UA:IRC>", IRColor);
 		}
 
         // surface (SMC)
-        if (document.getPreserveNonOsgAttrsAsUserData() && 0 != surface)
-        {
+//      if (document.getPreserveNonOsgAttrsAsUserData() && 0 != surface)
+		if (0 != surface)
+		{
           _geometry->setUserValue("<UA:SMC>", surface);
         }
 
         // feature (FID)
-        if (document.getPreserveNonOsgAttrsAsUserData() && 0 != feature)
-        {
+//		if (document.getPreserveNonOsgAttrsAsUserData() && 0 != feature)
+		if (0 != feature)
+		{
           _geometry->setUserValue("<UA:FID>", feature);
         }
 
