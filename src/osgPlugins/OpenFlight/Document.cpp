@@ -476,7 +476,7 @@ void Document::archiveRelease(void)
 {
 	if (_Archive)
 	{
-		osgDB::closeArchive(_Archive, true);
+//		osgDB::closeArchive(_Archive, false);
 		_Archive.release();
 		_Archive = NULL;
 	}
