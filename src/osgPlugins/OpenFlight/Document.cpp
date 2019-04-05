@@ -288,6 +288,11 @@ bool Document::MapTextureName2Archive(std::string &textureName)
 {
 	if (_Archive)
 	{
+		for (std::string::iterator it = textureName.begin(); it != textureName.end(); ++it)
+		{
+			if (*it == '\\')
+				*it = '/';
+		}
 		size_t pos0 = textureName.find("501_GTModelTexture");
 		if (pos0 != std::string::npos)
 		{
