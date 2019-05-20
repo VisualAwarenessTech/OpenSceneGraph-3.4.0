@@ -26,6 +26,7 @@
 #include <osgDB/ReadFile>
 #include <OpenThreads/ReentrantMutex>
 #include <osgUtil/Optimizer>
+#include <cdbGlobals/cdbGlobals>
 
 #include "Registry.h"
 #include "Document.h"
@@ -275,7 +276,69 @@ class FLTReaderWriter : public ReaderWriter
             if (!acceptsExtension(ext)) return ReadResult::FILE_NOT_HANDLED;
 
             std::string fileName = osgDB::findDataFile(file, options);
-            if (fileName.empty()) return ReadResult::FILE_NOT_FOUND;
+			if (fileName.empty())
+			{
+				if (file.find("D500_") != std::string::npos)
+				{
+					if (CDB_Global::getInstance()->Has_Layer("GTModelGeometry_Mda"))
+					{
+						osg::ref_ptr<osgDB::Archive> ar = NULL;
+
+						std::string GeometryArchiveName = "gpkg:GTModelGeometry_Mda.zip";
+						ar = osgDB::openArchive(GeometryArchiveName, osgDB::ReaderWriter::READ);
+						if (ar)
+						{
+							std::string name2find = file.substr(2);
+							std::string modelinArchive = "";
+							osgDB::Archive::FileNameList Archive_FileList;
+							ar->getFileNames(Archive_FileList);
+							for each(std::string name in Archive_FileList)
+							{
+								if (name.find(name2find) != std::string::npos)
+								{
+									modelinArchive = name;
+									break;
+								}
+							}
+							if (!modelinArchive.empty())
+							{
+								// in local cache?
+								{
+									osg::Node* node = flt::Registry::instance()->getExternalFromLocalCache(modelinArchive);
+									if (node)
+									{
+										ar.release();
+										return ReadResult(node, ReaderWriter::ReadResult::FILE_LOADED_FROM_CACHE);
+									}
+								}
+
+								osg::ref_ptr<Options> localoptions = options ? static_cast<Options*>(options->clone(osg::CopyOp::SHALLOW_COPY)) : new Options;
+								std::string modeltextPath = "gpkg:GTModelTexture_Mda.zip";
+								localoptions->setDatabasePath(modeltextPath);
+								std::string options_string = localoptions->getOptionString();
+								if (options_string.empty())
+									options_string = "TextureInArchive";
+								else
+									options_string.append(";TextureInArchive");
+								localoptions->setOptionString(options_string);
+								{
+									ReadResult rr = ar->readNode(modelinArchive,localoptions);
+									ar.release();
+									localoptions = NULL;
+									return rr;
+								}
+
+							}
+						}
+						else
+							return ReadResult::FILE_NOT_FOUND;
+					}
+					else
+						return ReadResult::FILE_NOT_FOUND;
+				}
+				else
+					return ReadResult::FILE_NOT_FOUND;
+			}
 
             // in local cache?
             {

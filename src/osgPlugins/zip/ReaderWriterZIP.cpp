@@ -6,7 +6,7 @@
 
 #include <sstream>
 #include "ZipArchive.h"
-#include <cdbGlobals\cdbGlobals>
+#include <cdbGlobals/cdbGlobals>
 
 class ReaderWriterZIP : public osgDB::ReaderWriter
 {
