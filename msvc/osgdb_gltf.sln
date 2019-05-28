@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "osgdb_gltf", "src\osgPlugins\glTF\osgdb_gltf.vcxproj", "{0BC4E445-3836-47B4-878E-843F4FEACA35}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0BC4E445-3836-47B4-878E-843F4FEACA35}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0BC4E445-3836-47B4-878E-843F4FEACA35}.Debug|Win32.Build.0 = Debug|Win32
+		{0BC4E445-3836-47B4-878E-843F4FEACA35}.Release|Win32.ActiveCfg = Release|Win32
+		{0BC4E445-3836-47B4-878E-843F4FEACA35}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
