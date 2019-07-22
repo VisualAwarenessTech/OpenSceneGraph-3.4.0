@@ -263,6 +263,7 @@ FltExportVisitor::writeFace( const osg::Geode& geode, const osg::Geometry& geom,
 			textureIndex = _texturePalette->add(0, texture);
 		else
 		{
+			//Note SECore models are throughing this message on export
 			std::string warning("fltexp: Face is textured, but Texture2D StateAttribute is NULL.");
 			OSG_WARN << warning << std::endl;
 			_fltOpt->getWriteResult().warn(warning);
@@ -290,13 +291,21 @@ FltExportVisitor::writeFace( const osg::Geode& geode, const osg::Geometry& geom,
             templateMode = FIXED_ALPHA_BLENDING;
     }
 
+#if _DEBUG
 	int32 IRColor = 0;
 	bool have_IR = geom.getUserValue("<UA:IRC>", IRColor);
 	int16 surface = 0;
 	bool have_SMC = geom.getUserValue("<UA:SMC>", surface);
 	int16 feature = 0;
 	bool have_fid = geom.getUserValue("<UA:FID>", feature);
-
+#else
+	int32 IRColor = 0;
+	geom.getUserValue("<UA:IRC>", IRColor);
+	int16 surface = 0;
+	geom.getUserValue("<UA:SMC>", surface);
+	int16 feature = 0;
+	geom.getUserValue("<UA:FID>", feature);
+#endif
     uint16 length( 80 );
     IdHelper id( *this, geode.getName() );
 #ifdef _DEBUG
@@ -463,6 +472,7 @@ FltExportVisitor::writeMesh( const osg::Geode& geode, const osg::Geometry& geom 
 			textureIndex = _texturePalette->add(0, texture);
 		else
 		{
+			//Note SECore models are throughing this message on export
 			std::string warning("fltexp: Face is textured, but Texture2D StateAttribute is NULL.");
 			OSG_WARN << warning << std::endl;
 			_fltOpt->getWriteResult().warn(warning);
@@ -496,13 +506,21 @@ FltExportVisitor::writeMesh( const osg::Geode& geode, const osg::Geometry& geom 
 	std::string name = geode.getName();
     IdHelper id( *this, geode.getName() );
 
+#ifdef _DEBUG
 	int32 IRColor = 0;
 	bool have_IR = geom.getUserValue("<UA:IRC>", IRColor);
 	int16 surface = 0;
 	bool have_SMC = geom.getUserValue("<UA:SMC>", surface);
 	int16 feature = 0;
 	bool have_fid = geom.getUserValue("<UA:FID>", feature);
-
+#else
+	int32 IRColor = 0;
+	geom.getUserValue("<UA:IRC>", IRColor);
+	int16 surface = 0;
+	geom.getUserValue("<UA:SMC>", surface);
+	int16 feature = 0;
+	geom.getUserValue("<UA:FID>", feature);
+#endif
     _records->writeInt16( (int16) MESH_OP );
     _records->writeUInt16( length );
     _records->writeID( id );
