@@ -22,11 +22,9 @@
 #pragma warning (push)
 #pragma warning (disable : 4251)
 #include <cdbGlobals/cdbGlobals>
-#include <gdal_priv.h>
 #include <ogr_geopackage.h>
 
-#include <osgDB/FileUtils>
-#include <osgDB/FileNameUtils>
+
 #include <ios>
 
 #ifdef _WIN32
@@ -40,7 +38,7 @@ CDB_Global CDB_Global_Instance;
 OGC_IE_Tracking OGC_IE_Tracking_Instance;
 
 
-CDB_Global::CDB_Global() : m_ogrDataset(NULL)
+CDB_Global::CDB_Global() : m_ogrDataset(NULL), m_ConType(ConnOther)
 {
 	s_BaseMapLodNum = 0;
 	s_EnableBathymetry = true;
@@ -79,7 +77,18 @@ CDB_Global::~CDB_Global()
 			Mem.bufsize = 0;
 		}
 	}
-
+	if (m_TileVectorMap.size() > 0)
+	{
+		for each(ModelOgrTileP tile in m_TileVectorMap)
+		{
+			if (tile)
+			{
+				delete tile;
+				tile = NULL;
+			}
+		}
+		m_TileVectorMap.clear();
+	}
 	if (m_GTGeometry.bufferdata)
 	{
 		delete m_GTGeometry.bufferdata;
@@ -134,19 +143,33 @@ bool CDB_Global::Open_Vector_File(std::string FileName)
 		m_ogrDataset = (GDALDataset *) GDALOpenEx(FileName.c_str(), GDAL_OF_VECTOR | GA_ReadOnly | GDAL_OF_SHARED, drivers, NULL, NULL);
 		if (!m_ogrDataset)
 			return false;
+		m_ConType = ConnGPKG;
 	}
 	else
 		return false;
 	return true;
 }
 
-bool CDB_Global::Has_Layer(std::string LayerName)
+bool CDB_Global::Has_Layer(std::string LayerName, __int64 tileKey)
 {
-	if (!m_ogrDataset)
+	GDALDataset * ogrDataset = NULL;
+	if (tileKey == 0)
+		ogrDataset = m_ogrDataset;
+	else
+	{
+		ModelOgrTileP mtile = GetVectorTile(tileKey);
+		if (mtile)
+		{
+			ogrDataset = (GDALGeoPackageDataset *)mtile->Get_Dataset();
+		}
+
+	}
+
+	if (!ogrDataset)
 		return false;
 	else
 	{
-		OGRLayer * poLayer = m_ogrDataset->GetLayerByName(LayerName.c_str());
+		OGRLayer * poLayer = ogrDataset->GetLayerByName(LayerName.c_str());
 		if (poLayer)
 			return true;
 		else
@@ -155,18 +178,18 @@ bool CDB_Global::Has_Layer(std::string LayerName)
 }
 
 
-bool CDB_Global::Load_Media(const std::string MediaId)
+bool CDB_Global::Load_Media(const std::string MediaId, __int64 tileKey)
 {
 	GSMediaKey MyKey;
 	std::string gpkgTableName;
 	GSTableType TableType = GSInvalid;
 	if (!ParseGSKey(MediaId, MyKey, gpkgTableName, TableType))
 		return false;
-	return Add_Media_to_Map(MyKey, gpkgTableName, TableType);
+	return Add_Media_to_Map(MyKey, gpkgTableName, TableType, tileKey);
 }
 
 
-bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, GSTableType TableType)
+bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, GSTableType TableType, __int64 tileKey)
 {
 
 	std::string stringkey = MyKey.ToString();
@@ -199,7 +222,19 @@ bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, G
 	}
 
 
-	GDALGeoPackageDataset * poDataset = (GDALGeoPackageDataset *)m_ogrDataset;
+	GDALGeoPackageDataset * poDataset = NULL;
+	if(tileKey == 0)
+		poDataset = (GDALGeoPackageDataset *)m_ogrDataset;
+	else
+	{
+		ModelOgrTileP mtile = GetVectorTile(tileKey);
+		if (mtile)
+		{
+			poDataset = (GDALGeoPackageDataset *)mtile->Get_Dataset();
+		}
+		else
+			return false;
+	}
 	sqlite3 *hDB = poDataset->GetDB();
 
 	GSMediaMemory fin;
@@ -515,6 +550,72 @@ void CDB_Global::Set_CDB_Tile_Be_Verbose(bool value)
 bool CDB_Global::CDB_Tile_Be_Verbose(void)
 {
 	return s_CDB_Tile_Be_Verbose;
+}
+
+GBLConnectionType CDB_Global::Get_ConnectionType(void)
+{
+	return m_ConType;
+}
+
+void CDB_Global::Set_GlobalTileLOD(int lod)
+{
+	m_GlobalTileLOD = lod;
+}
+
+int CDB_Global::Get_GlobalTileLOD(void)
+{
+	return m_GlobalTileLOD;
+}
+
+void CDB_Global::AddVectorTile(ModelOgrTileP Tile)
+{
+	if (Tile)
+	{
+		if(!HasVectorTile(Tile->tileKey))
+			m_TileVectorMap.push_back(Tile);
+	}
+}
+
+bool CDB_Global::HasVectorTile(__int64 TileKey)
+{
+	for each (ModelOgrTileP tile in m_TileVectorMap)
+	{
+		if (tile->tileKey == TileKey)
+		{
+			return true;
+		}
+	}
+	return false;
+
+}
+
+ModelOgrTileP CDB_Global::GetVectorTile(__int64 TileKey)
+{
+	for each (ModelOgrTileP tile in m_TileVectorMap)
+	{
+		if (tile->tileKey == TileKey)
+		{
+			return tile;
+		}
+	}
+	return NULL;
+}
+
+ModelOgrTileP CDB_Global::FindVectorTile(double lat, double lon)
+{
+	if (m_TileVectorMap.size() == 1)
+		return m_TileVectorMap[0];
+	else
+	{
+		for each (ModelOgrTileP tile in m_TileVectorMap)
+		{
+			if (tile->Contains(lon, lat))
+			{
+				return tile;
+			}
+		}
+		return NULL;
+	}
 }
 
 CDB_Global * CDB_Global::getInstance(void)
