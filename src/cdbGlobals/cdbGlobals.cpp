@@ -132,21 +132,51 @@ void CDB_Global::Check_Done(void)
 
 bool CDB_Global::Open_Vector_File(std::string FileName)
 {
-	bool FileExists = osgDB::fileExists(FileName);
-	if (FileExists && (FileName.find(".gpkg") != std::string::npos))
+	if (m_ogrDataset)
 	{
-		//		GDALOpenInfo oOpenInfoP(m_FileName.c_str(), GA_ReadOnly | GDAL_OF_VECTOR);
-		//		m_GDAL.poDataset = m_GDAL.poDriver->pfnOpen(&oOpenInfoP);
-		char * drivers[2];
-		drivers[0] = "GPKG";
-		drivers[1] = NULL;
-		m_ogrDataset = (GDALDataset *) GDALOpenEx(FileName.c_str(), GDAL_OF_VECTOR | GA_ReadOnly | GDAL_OF_SHARED, drivers, NULL, NULL);
-		if (!m_ogrDataset)
+		if (FileName == m_GlobalFileName)
+			return true;
+		else
 			return false;
-		m_ConType = ConnGPKG;
 	}
 	else
-		return false;
+	{
+		bool FileExists = osgDB::fileExists(FileName);
+		if (FileExists && (FileName.find(".gpkg") != std::string::npos))
+		{
+			//		GDALOpenInfo oOpenInfoP(m_FileName.c_str(), GA_ReadOnly | GDAL_OF_VECTOR);
+			//		m_GDAL.poDataset = m_GDAL.poDriver->pfnOpen(&oOpenInfoP);
+			char * drivers[2];
+			drivers[0] = "GPKG";
+			drivers[1] = NULL;
+			m_ogrDataset = (GDALDataset *)GDALOpenEx(FileName.c_str(), GDAL_OF_VECTOR | GA_ReadOnly | GDAL_OF_SHARED, drivers, NULL, NULL);
+			if (!m_ogrDataset)
+				return false;
+			m_ConType = ConnGPKG;
+			m_GlobalFileName = FileName;
+		}
+		else if (FileExists && (FileName.find(".xml") != std::string::npos))
+		{
+			m_ogrDataset = (GDALDataset *)GDALOpenEx(FileName.c_str(), GDAL_OF_VECTOR | GA_ReadOnly | GDAL_OF_SHARED, NULL, NULL, NULL);
+			if (!m_ogrDataset)
+				return false;
+			m_ConType = ConnWFS;
+			m_GlobalFileName = FileName;
+			m_WFSLayerList.clear();
+			int layercnt = m_ogrDataset->GetLayerCount();
+			for (int i = 0; i < layercnt; ++i)
+			{
+				OGRLayer * poLayer = m_ogrDataset->GetLayer(i);
+				if (poLayer)
+				{
+					std::string name = poLayer->GetName();
+					m_WFSLayerList.push_back(name);
+				}
+			}
+		}
+		else
+			return false;
+	}
 	return true;
 }
 
@@ -169,7 +199,13 @@ bool CDB_Global::Has_Layer(std::string LayerName, __int64 tileKey)
 		return false;
 	else
 	{
-		OGRLayer * poLayer = ogrDataset->GetLayerByName(LayerName.c_str());
+		std::string ActualLayer = "";
+		if (m_ConType == ConnWFS)
+			ActualLayer = ToWFSLayer(LayerName);
+		else
+			ActualLayer = LayerName;
+
+		OGRLayer * poLayer = ogrDataset->GetLayerByName(ActualLayer.c_str());
 		if (poLayer)
 			return true;
 		else
@@ -177,6 +213,20 @@ bool CDB_Global::Has_Layer(std::string LayerName, __int64 tileKey)
 	}
 }
 
+std::string CDB_Global::ToWFSLayer(std::string LayerName)
+{
+	std::string retstring = LayerName;
+	std::string item = LayerName.substr(4);
+	for (int i = 0; i < m_WFSLayerList.size(); ++i)
+	{
+		if (m_WFSLayerList[i].find(item) != std::string::npos)
+		{
+			retstring = m_WFSLayerList[i];
+			break;
+		}
+	}
+	return retstring;
+}
 
 bool CDB_Global::Load_Media(const std::string MediaId, __int64 tileKey)
 {
@@ -554,7 +604,10 @@ bool CDB_Global::CDB_Tile_Be_Verbose(void)
 
 GBLConnectionType CDB_Global::Get_ConnectionType(void)
 {
-	return m_ConType;
+	if (m_ogrDataset == NULL)
+		return ConnNone;
+	else
+		return m_ConType;
 }
 
 void CDB_Global::Set_GlobalTileLOD(int lod)
