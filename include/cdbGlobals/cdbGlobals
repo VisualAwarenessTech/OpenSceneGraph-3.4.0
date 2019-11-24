@@ -312,7 +312,7 @@ public:
 	ModelOgrTileP GetVectorTile(__int64 TileKey);
 
 	ModelOgrTileP FindVectorTile(double lat, double lon);
-	std::string ToWFSLayer(std::string LayerName);
+	std::string ToWFSLayer(std::string LayerName, int spos = 4);
 
 	static CDB_Global * getInstance(void);
 

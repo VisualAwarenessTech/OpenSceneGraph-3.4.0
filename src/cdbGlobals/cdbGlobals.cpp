@@ -26,6 +26,7 @@
 
 
 #include <ios>
+#include "cdbGlobals/base64.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -213,10 +214,10 @@ bool CDB_Global::Has_Layer(std::string LayerName, __int64 tileKey)
 	}
 }
 
-std::string CDB_Global::ToWFSLayer(std::string LayerName)
+std::string CDB_Global::ToWFSLayer(std::string LayerName, int spos)
 {
 	std::string retstring = LayerName;
-	std::string item = LayerName.substr(4);
+	std::string item = LayerName.substr(spos);
 	for (int i = 0; i < m_WFSLayerList.size(); ++i)
 	{
 		if (m_WFSLayerList[i].find(item) != std::string::npos)
@@ -271,10 +272,15 @@ bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, G
 		return false;
 	}
 
-
+	bool process_wfs = false;
 	GDALGeoPackageDataset * poDataset = NULL;
-	if(tileKey == 0)
-		poDataset = (GDALGeoPackageDataset *)m_ogrDataset;
+	if (tileKey == 0)
+	{
+		if (m_ConType == ConnGPKG)
+			poDataset = (GDALGeoPackageDataset *)m_ogrDataset;
+		else
+			process_wfs = true;
+	}
 	else
 	{
 		ModelOgrTileP mtile = GetVectorTile(tileKey);
@@ -285,49 +291,102 @@ bool CDB_Global::Add_Media_to_Map(GSMediaKey MyKey, std::string gpkgTableName, G
 		else
 			return false;
 	}
-	sqlite3 *hDB = poDataset->GetDB();
-
 	GSMediaMemory fin;
-	char* pszSelectMedia = sqlite3_mprintf("SELECT data FROM \"%w\" WHERE uref = ? AND rref = ? ", gpkgTableName.c_str());
-	sqlite3_stmt *stmt;
-	int rc;
-	rc = sqlite3_prepare_v2(hDB, pszSelectMedia, -1, &stmt, NULL);
-	if (rc == SQLITE_OK)
+	char* pszSelectMedia = NULL;
+	if (process_wfs)
 	{
-		sqlite3_bind_int(stmt, 1, MyKey.UrefNum);
-		sqlite3_bind_int(stmt, 2, MyKey.RrefNum);
-		rc = sqlite3_step(stmt);
-		if (rc == SQLITE_ROW)
+		pszSelectMedia = sqlite3_mprintf("uref = \'%d\' AND rref = \'%d\'", MyKey.UrefNum, MyKey.RrefNum);
+		std::string wfsLayerName = "";
+		if((TableType == GTGeometry) || (TableType == GTTexture))
+			wfsLayerName = ToWFSLayer(gpkgTableName, 0);
+		else
+			wfsLayerName = ToWFSLayer(gpkgTableName);
+		if (!wfsLayerName.empty())
 		{
-			fin.bufsize = sqlite3_column_bytes(stmt, 0);
-			fin.bufferdata = new char[fin.bufsize];
-			std::memcpy(fin.bufferdata, (char *)sqlite3_column_blob(stmt, 0), fin.bufsize);
-			rc = sqlite3_finalize(stmt);
-			if (rc == SQLITE_SCHEMA)
+			OGRLayer * myWFSLayer = m_ogrDataset->GetLayerByName(wfsLayerName.c_str());
+			if (myWFSLayer)
+			{
+				OGRErr ec = myWFSLayer->SetAttributeFilter(pszSelectMedia);
+				if (ec == OGRERR_NONE)
+				{
+					myWFSLayer->ResetReading();
+					//				GIntBig LayerCount = poLayer->GetFeatureCount(TRUE);
+					OGRFeature * poFeature = myWFSLayer->GetNextFeature();
+					if (poFeature)
+					{
+						GByte *buffer = NULL;
+						int pnBytes = 0;
+						int fieldIdx = poFeature->GetFieldIndex("data");
+						if (fieldIdx >= 0)
+						{
+							buffer = poFeature->GetFieldAsBinary(fieldIdx, &pnBytes);
+							if (buffer)
+							{
+								if (!unbase64((const char *)buffer, pnBytes, fin))
+								{
+									return false;
+								}
+							}
+						}
+						OGRFeature::DestroyFeature(poFeature);
+					}
+					else
+						return false;
+				}
+				else
+					return false;
+			}
+			else
 				return false;
-
-			if (TableType == GSGeometry)
-			{
-				m_GSGeometryMap.insert(std::pair<std::string, GSMediaMemory>(stringkey, fin));
-			}
-			else if (TableType == GSTexture)
-			{
-				m_GSTextureMap.insert(std::pair<std::string, GSMediaMemory>(stringkey, fin));
-			}
-			else if (TableType == GTGeometry)
-			{
-				m_GTGeometry = fin;
-			}
-			else if (TableType == GTTexture)
-			{
-				m_GTTexture = fin;
-			}
 		}
 		else
 			return false;
 	}
 	else
-		return false;
+	{
+		sqlite3 *hDB = poDataset->GetDB();
+		pszSelectMedia = sqlite3_mprintf("SELECT data FROM \"%w\" WHERE uref = ? AND rref = ? ", gpkgTableName.c_str());
+		sqlite3_stmt *stmt;
+		int rc;
+		rc = sqlite3_prepare_v2(hDB, pszSelectMedia, -1, &stmt, NULL);
+		if (rc == SQLITE_OK)
+		{
+			sqlite3_bind_int(stmt, 1, MyKey.UrefNum);
+			sqlite3_bind_int(stmt, 2, MyKey.RrefNum);
+			rc = sqlite3_step(stmt);
+			if (rc == SQLITE_ROW)
+			{
+				fin.bufsize = sqlite3_column_bytes(stmt, 0);
+				fin.bufferdata = new char[fin.bufsize];
+				std::memcpy(fin.bufferdata, (char *)sqlite3_column_blob(stmt, 0), fin.bufsize);
+				rc = sqlite3_finalize(stmt);
+				if (rc == SQLITE_SCHEMA)
+					return false;
+
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+	}
+
+	if (TableType == GSGeometry)
+	{
+		m_GSGeometryMap.insert(std::pair<std::string, GSMediaMemory>(stringkey, fin));
+	}
+	else if (TableType == GSTexture)
+	{
+		m_GSTextureMap.insert(std::pair<std::string, GSMediaMemory>(stringkey, fin));
+	}
+	else if (TableType == GTGeometry)
+	{
+		m_GTGeometry = fin;
+	}
+	else if (TableType == GTTexture)
+	{
+		m_GTTexture = fin;
+	}
 
 	return true;
 }
