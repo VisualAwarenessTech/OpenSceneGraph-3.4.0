@@ -199,8 +199,8 @@ typedef struct tm_unz_s
 DWORD GetFilePosU(HANDLE hfout)
 { 
 	struct stat st; 
-	fstat(FILENO(hfout),&st);
-	if ((st.st_mode&S_IFREG)==0) 
+	fstat(FILENO(hfout), &st);
+	if ((st.st_mode & S_IFREG)==0) 
 		return 0xFFFFFFFF;
 	return ftell(hfout);
 }
@@ -208,7 +208,7 @@ DWORD GetFilePosU(HANDLE hfout)
 bool FileExists(const TCHAR *fn)
 { 
 	struct stat st;
-	int res=stat(fn,&st);
+	int res = stat(fn,&st);
 	return (res==0);
 }
 
@@ -4084,11 +4084,14 @@ class TUnzip
 
 
 ZRESULT TUnzip::Open(void *z,unsigned int len,DWORD flags)
-{ if (uf!=0 || currentfile!=-1) return ZR_NOTINITED;
+{ 
+  if (uf!=0 || currentfile!=-1) 
+	  return ZR_NOTINITED;
   //
 #ifdef ZIP_STD
   char* buf = GETCWD(rootdir,MAX_PATH-1);
-  if (buf==0) return ZR_NOFILE;
+  if (buf==0) 
+	  return ZR_NOFILE;
 #else
 #ifdef GetCurrentDirectory
   GetCurrentDirectory(MAX_PATH-1,rootdir);
@@ -4097,18 +4100,26 @@ ZRESULT TUnzip::Open(void *z,unsigned int len,DWORD flags)
 #endif
 #endif
   TCHAR *lastchar = &rootdir[_tcslen(rootdir)-1];
-  if (*lastchar!='\\' && *lastchar!='/') {lastchar[1]='/'; lastchar[2]=0;}
+  if (*lastchar!='\\' && *lastchar!='/') 
+  {
+	  lastchar[1]='/'; 
+	  lastchar[2]=0;
+  }
   //
   if (flags==ZIP_HANDLE)
   { // test if we can seek on it. We can't use GetFileType(h)==FILE_TYPE_DISK since it's not on CE.
     DWORD res = GetFilePosU((HANDLE)z);
     bool canseek = (res!=0xFFFFFFFF);
-    if (!canseek) return ZR_SEEK;
+    if (!canseek) 
+		return ZR_SEEK;
   }
-  ZRESULT e; LUFILE *f = lufopen(z,len,flags,&e);
-  if (f==NULL) return e;
+  ZRESULT e; 
+  LUFILE *f = lufopen(z, len, flags, &e);
+  if (f==NULL) 
+	  return e;
   uf = unzOpenInternal(f);
-  if (uf==0) return ZR_NOFILE;
+  if (uf==0)
+	  return ZR_NOFILE;
   return ZR_OK;
 }
 
@@ -4557,12 +4568,19 @@ typedef struct
   TUnzip *unz;
 } TUnzipHandleData;
 
-HZIP OpenZipInternal(void *z,unsigned int len,DWORD flags, const char *password)
-{ TUnzip *unz = new TUnzip(password);
+HZIP OpenZipInternal(void *z, unsigned int len, DWORD flags, const char *password)
+{ 
+  TUnzip *unz = new TUnzip(password);
   lasterrorU = unz->Open(z,len,flags);
-  if (lasterrorU!=ZR_OK) {delete unz; return 0;}
+  if (lasterrorU!=ZR_OK)
+  {
+	  delete unz; 
+	  return 0;
+  }
   TUnzipHandleData *han = new TUnzipHandleData;
-  han->flag=1; han->unz=unz; return (HZIP)han;
+  han->flag=1; 
+  han->unz=unz; 
+  return (HZIP)han;
 }
 HZIP OpenZipHandle(HANDLE h, const char *password) {return OpenZipInternal((void*)h,0,ZIP_HANDLE,password);}
 HZIP OpenZip(const TCHAR *fn, const char *password) {return OpenZipInternal((void*)fn,0,ZIP_FILENAME,password);}
