@@ -57,6 +57,7 @@ Document::Document() :
 	_ModelHomeDirectory(""),
 	_ActiveArchive(NULL),
 	_CDB_Verify(false),
+	_SwapDDS2PNG(false),
 	_CDBModel_Has_Sigsize(false)
 {
     _subsurfaceDepth = new osg::Depth(osg::Depth::LESS, 0.0, 1.0,false);

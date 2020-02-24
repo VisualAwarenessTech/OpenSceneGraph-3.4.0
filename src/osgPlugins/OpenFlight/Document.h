@@ -222,6 +222,9 @@ class Document
 		void setCDB_Verify(bool flag) { _CDB_Verify = flag; }
 		bool getCDB_Verify() const { return _CDB_Verify; }
 
+		void setDDS2PNG(bool flag) { _SwapDDS2PNG = flag; }
+		bool getDDS2PNG() const { return _SwapDDS2PNG; }
+
 		void setCDBModel_Has_Sigsize(bool flag) { _CDBModel_Has_Sigsize = flag; }
 		bool getCDBModel_Has_Sigsize() const { return _CDBModel_Has_Sigsize; }
 
@@ -264,6 +267,7 @@ class Document
 		bool						_remap2Directory;
 		bool						_CDB_Verify;
 		bool						_CDBModel_Has_Sigsize;
+		bool						_SwapDDS2PNG;
         CoordUnits                  _desiredUnits;
 
         bool                        _keepExternalReferences;

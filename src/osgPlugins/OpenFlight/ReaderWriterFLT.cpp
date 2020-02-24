@@ -254,6 +254,7 @@ class FLTReaderWriter : public ReaderWriter
 			supportsOption("TextureInArchive", "Import option: If present in the Options string, an archive name is located in the dbpath. When this option is present textures are mapped to and read from the named archive file according to the CDB specification");
 			supportsOption("Remap2Directory", "Import option: If present in the Options string, directory names are parsed from the dbpath. When this option is present textures are mapped to and read from the named directory according to the CDB specification");
 			supportsOption("CDBVerification", "Import option: If present in the Options string, CDB Rules Messages are output durring model load. When this option is present textures are mapped to and read from the named directory according to the CDB specification");
+			supportsOption("Switchdds2png", "Import option: If present in the Options string, if a dds texture is found and a png texture of the same name is found in the search path the png texuter is used");
 		}
 
         virtual const char* className() const { return "FLT Reader/Writer"; }
@@ -430,6 +431,9 @@ class FLTReaderWriter : public ReaderWriter
 
 				document.setCDB_Verify((options->getOptionString().find("CDBVerification") != std::string::npos));
 				OSG_DEBUG << readerMsg << "CDBVerification" << document.getRemap2Directory() << std::endl;
+
+				document.setDDS2PNG((options->getOptionString().find("Switchdds2png") != std::string::npos));
+				OSG_DEBUG << readerMsg << "Switchdds2png" << document.getDDS2PNG() << std::endl;
 
 				document.setPreserveFace((options->getOptionString().find("preserveFace")!=std::string::npos));
                 OSG_DEBUG << readerMsg << "preserveFace=" << document.getPreserveFace() << std::endl;

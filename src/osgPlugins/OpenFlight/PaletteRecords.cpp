@@ -565,8 +565,25 @@ protected:
 
 		}
 		else
-			pathname = osgDB::findDataFile(filename,document.getOptions());
- 
+		{
+			if (document.getDDS2PNG())
+			{
+				size_t ipos = filename.find(".dds");
+				if (ipos != std::string::npos)
+				{
+					size_t spos = 0;
+					std::string wfilename = filename.substr(spos, ipos) + ".png";
+					pathname = osgDB::findDataFile(wfilename, document.getOptions());
+					if (pathname.empty())
+						pathname = osgDB::findDataFile(filename, document.getOptions());
+				}
+				else
+					pathname = osgDB::findDataFile(filename, document.getOptions());
+			}
+			else
+				pathname = osgDB::findDataFile(filename, document.getOptions());
+
+		}
 		if (pathname.empty())
         {
 			if (!missingmessagesent)
